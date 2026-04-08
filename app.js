@@ -1,4 +1,5 @@
-import React, { useState } from "https://esm.sh/react";
+import React from "https://esm.sh/react";
+const { useState } = React;
 
 export default function App() {
   const [page, setPage] = useState("landing");
