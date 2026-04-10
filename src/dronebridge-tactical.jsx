@@ -236,7 +236,7 @@ function CommandCenter() {
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEBRIDGE // TACTICAL OPERATIONS CENTER</div>
+        <div className="ph-pre">DRONEFORCE // TACTICAL OPERATIONS CENTER</div>
         <div className="ph-title">⬡ COMMAND CENTER</div>
         <div className="ph-sub">실시간 플랫폼 현황 모니터링</div>
       </div>
@@ -359,7 +359,7 @@ function MissionBriefing() {
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEBRIDGE // COMMAND</div>
+        <div className="ph-pre">DRONEFORCE // COMMAND</div>
         <div className="ph-title">✦ MISSION BRIEFING</div>
         <div className="ph-sub">임무 의뢰 등록 — 소요시간 약 5분</div>
       </div>
@@ -545,7 +545,7 @@ function ForceList() {
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEBRIDGE // OPERATORS</div>
+        <div className="ph-pre">DRONEFORCE // OPERATORS</div>
         <div className="ph-title">◆ FORCE LIST</div>
         <div className="ph-sub">인증된 군 출신 드론 오퍼레이터 — {OPERATORS.length}명 등록</div>
       </div>
@@ -615,7 +615,7 @@ function TacticalMap() {
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEBRIDGE // REAL-TIME</div>
+        <div className="ph-pre">DRONEFORCE // REAL-TIME</div>
         <div className="ph-title">◉ TACTICAL MAP</div>
         <div className="ph-sub">실시간 임무 현황 지도 (Supabase Realtime 연동 예정)</div>
       </div>
@@ -713,7 +713,7 @@ function IntelCenter() {
     { icon:"🔒", title:"개인정보보호법 드론 촬영 가이드",     desc:"공공장소 드론 촬영 시 개인정보 처리 기준. 동의 획득 방법 및 영상 보관·파기 규정.",                                  tag:"법규 · 권고",     tcol:"green" },
     { icon:"📋", title:"항공사업법 드론 사업자 등록",         desc:"드론 촬영·측량·배달 등 유상 비행 서비스 제공 시 필수 사업자 등록 절차 및 요건.",                                   tag:"사업 · 필수",     tcol:"orange" },
     { icon:"🛡️", title:"드론 배상책임보험 가이드",           desc:"드론 사고 발생 시 손해배상 의무. 파일럿 개인 가입 의무 및 추천 보험사 목록 (메리츠, DB, 현대).",                    tag:"보험 · 권고",     tcol:"green" },
-    { icon:"📄", title:"디지털 임무 완료 보고서 템플릿",     desc:"DroneBridge 표준 보고서 양식. 비행 로그, 지형 분석, 결과물, 안전 체크리스트 포함. 지자체 납품 가능 포맷.",           tag:"문서 · 플랫폼",   tcol:"green" },
+    { icon:"📄", title:"디지털 임무 완료 보고서 템플릿",     desc:"DRONEFORCE 표준 보고서 양식. 비행 로그, 지형 분석, 결과물, 안전 체크리스트 포함. 지자체 납품 가능 포맷.",           tag:"문서 · 플랫폼",   tcol:"green" },
   ];
 
   const REPORTS = [
@@ -731,7 +731,7 @@ function IntelCenter() {
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEBRIDGE // KNOWLEDGE BASE</div>
+        <div className="ph-pre">DRONEFORCE // KNOWLEDGE BASE</div>
         <div className="ph-title">▣ INTEL CENTER</div>
         <div className="ph-sub">법규 정보 · 비행금지구역 · 임무 보고서 보관함</div>
       </div>
@@ -793,7 +793,7 @@ function OperatorDash() {
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEBRIDGE // OPERATOR HQ</div>
+        <div className="ph-pre">DRONEFORCE // OPERATOR HQ</div>
         <div className="ph-title orb">⬢ {me.callsign} — OPERATOR HQ</div>
         <div className="ph-sub">{me.branch} · {me.region}</div>
       </div>
@@ -870,7 +870,7 @@ function OperatorDash() {
 // ─────────────────────────────────────────────
 // MAIN APP
 // ─────────────────────────────────────────────
-export default function DroneBridge() {
+export default function DRONEFORCE() {
   const [screen,  setScreen]  = useState("login");
   const [nav,     setNav]     = useState("command");
   const [role,    setRole]    = useState(null);
@@ -896,7 +896,7 @@ export default function DroneBridge() {
         <div className="login-box">
           <div style={{textAlign:"center",marginBottom:28}}>
             <div style={{fontSize:9,color:"var(--text3)",letterSpacing:4,marginBottom:10}}>▶ SYSTEM INITIALIZE ◀</div>
-            <div className="logo" style={{fontSize:26,letterSpacing:6,display:"block"}}>DRONE<span>BRIDGE</span></div>
+            <div className="logo" style={{fontSize:26,letterSpacing:6,display:"block"}}>DRONE<span>FORCE</span></div>
             <div style={{fontSize:10,color:"var(--text2)",letterSpacing:2,marginTop:8}}>TACTICAL OPERATIONS PLATFORM v2.6.0</div>
           </div>
 
@@ -968,7 +968,7 @@ export default function DroneBridge() {
 
       {/* TOP BAR */}
       <div className="topbar">
-        <div className="logo">DRONE<span>BRIDGE</span></div>
+        <div className="logo">DRONE<span>FORCE</span></div>
         <div className="vbar" />
         <div className="sys"><div className="dot" /> SYS ONLINE</div>
         <div className="sys"><div className="dot" /> DB CONNECTED</div>
