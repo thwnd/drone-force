@@ -1,5 +1,5 @@
-import DroneBridge from './dronebridge-tactical'
+import DroneForce from './droneforce-navy'
 
 export default function App() {
-  return <DroneBridge />
+  return <DroneForce />
 }
