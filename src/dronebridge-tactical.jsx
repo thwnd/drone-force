@@ -1,317 +1,326 @@
 import { useState, useEffect } from "react";
 
-// ─────────────────────────────────────────────
-// CSS
-// ─────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 *{margin:0;padding:0;box-sizing:border-box;}
 
 :root{
-  --bg:#020902;--bg2:#060d06;--bg3:#0a150a;
-  --green:#00ff41;--green2:#00cc33;--green3:#006618;--green4:#001d08;
-  --orange:#ff9500;--red:#ff3535;--blue:#4499ff;
-  --text:#aaffb0;--text2:#5a9a5f;--text3:#2a5a2f;
-  --border:#0a200a;--border2:#163016;
+  --navy-950:#060C1A;--navy-900:#0B1527;--navy-800:#101E36;--navy-700:#152645;
+  --navy-600:#1C3260;--navy-500:#22407A;
+  --blue-500:#3B82F6;--blue-400:#60A5FA;--blue-300:#93C5FD;--blue-200:#BFDBFE;--blue-100:#DBEAFE;
+  --slate-400:#94A3B8;--slate-300:#CBD5E1;--slate-200:#E2E8F0;--slate-100:#F1F5F9;
+  --white:#FFFFFF;--orange:#F97316;--green:#22C55E;--red:#EF4444;
+  --border:#1C3260;--border2:#152645;
+  --text:#E2E8F0;--text2:#94A3B8;--text3:#475569;
 }
 
-.db-app{background:var(--bg);min-height:100vh;font-family:'Share Tech Mono',monospace;color:var(--text);position:relative;overflow:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--navy-950);color:var(--text);}
 
-/* scanlines */
-.db-app::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.018) 2px,rgba(0,255,65,.018) 4px);pointer-events:none;z-index:9999;}
+.app{min-height:100vh;background:var(--navy-950);}
 
-/* dot grid */
-.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,65,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.05) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
+/* subtle noise texture */
+.app::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5;}
 
 /* ── TOPBAR ── */
-.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border2);display:flex;align-items:center;padding:0 20px;gap:18px;position:relative;z-index:100;}
-.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:17px;color:var(--green);letter-spacing:5px;text-shadow:0 0 22px rgba(0,255,65,.55);}
-.logo span{color:var(--text2);font-weight:400;}
-.vbar{width:1px;height:22px;background:var(--border2);}
-.sys{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);letter-spacing:1px;}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 2s infinite;}
-.dot.o{background:var(--orange);box-shadow:0 0 7px var(--orange);}
-.dot.r{background:var(--red);box-shadow:0 0 7px var(--red);}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.ml-auto{margin-left:auto;}
-.clock{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--green);letter-spacing:3px;}
-.badge-user{background:var(--green4);border:1px solid var(--green3);padding:4px 12px;font-size:10px;color:var(--green2);letter-spacing:1px;cursor:pointer;transition:all .15s;}
-.badge-user:hover{border-color:var(--green);color:var(--green);}
+.topbar{height:60px;background:var(--navy-900);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:20px;position:relative;z-index:100;}
+.logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:var(--white);letter-spacing:-0.3px;}
+.logo em{color:var(--blue-400);font-style:normal;}
+.logo-badge{background:var(--blue-500);color:var(--white);font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;letter-spacing:.5px;margin-left:6px;vertical-align:middle;}
+.divider{width:1px;height:20px;background:var(--border);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px rgba(34,197,94,.2);animation:pulse 2.5s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(34,197,94,.2)}50%{box-shadow:0 0 0 4px rgba(34,197,94,.08)}}
+.status-text{font-size:12px;color:var(--text2);letter-spacing:.3px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.clock-badge{background:var(--navy-800);border:1px solid var(--border);padding:5px 12px;border-radius:6px;font-size:12px;font-family:'Space Grotesk',sans-serif;color:var(--blue-300);letter-spacing:.5px;}
+.user-btn{display:flex;align-items:center;gap:8px;background:var(--navy-800);border:1px solid var(--border);padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s;font-size:12px;color:var(--text);}
+.user-btn:hover{border-color:var(--blue-500);color:var(--white);}
+.avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue-500),var(--blue-400));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--white);}
 
 /* ── LAYOUT ── */
-.layout{display:flex;height:calc(100vh - 52px);position:relative;z-index:1;}
-.sidebar{width:196px;background:var(--bg2);border-right:1px solid var(--border2);padding:16px 0;flex-shrink:0;display:flex;flex-direction:column;}
-.ns{padding:0 14px 8px;font-size:9px;color:var(--text3);letter-spacing:3px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;font-size:11px;color:var(--text2);letter-spacing:1px;border-left:2px solid transparent;transition:all .15s;}
-.nav-item:hover{background:var(--bg3);color:var(--text);border-left-color:var(--green3);}
-.nav-item.active{background:var(--green4);color:var(--green);border-left-color:var(--green);}
-.nav-item .ni{font-size:13px;width:18px;text-align:center;}
-.nb{margin-left:auto;background:var(--green);color:var(--bg);font-size:9px;padding:1px 5px;font-weight:bold;}
-.main{flex:1;overflow-y:auto;padding:24px;scrollbar-width:thin;scrollbar-color:var(--green3) var(--bg);}
+.layout{display:flex;height:calc(100vh - 60px);position:relative;z-index:1;}
+.sidebar{width:220px;background:var(--navy-900);border-right:1px solid var(--border);padding:20px 0;flex-shrink:0;display:flex;flex-direction:column;}
+.nav-section{padding:0 16px 6px;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text2);border-radius:8px;transition:all .15s;font-weight:400;}
+.nav-item:hover{background:var(--navy-800);color:var(--text);}
+.nav-item.active{background:rgba(59,130,246,.12);color:var(--blue-400);font-weight:500;}
+.nav-item.active .nav-icon{color:var(--blue-400);}
+.nav-icon{width:16px;text-align:center;font-size:14px;color:var(--text3);}
+.nav-badge{margin-left:auto;background:var(--blue-500);color:var(--white);font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.nav-badge.orange{background:var(--orange);}
+.sidebar-footer{margin-top:auto;padding:16px;}
+.plan-card{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:12px;}
+.plan-label{font-size:10px;color:var(--blue-300);font-weight:600;letter-spacing:.5px;margin-bottom:4px;}
+.plan-val{font-size:12px;color:var(--text2);}
+.pbar{height:4px;background:var(--navy-700);border-radius:2px;margin-top:8px;}
+.pfill{height:100%;border-radius:2px;background:var(--blue-500);transition:width .4s ease;}
+
+.main{flex:1;overflow-y:auto;padding:28px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 
 /* ── PAGE HEADER ── */
-.ph-pre{font-size:9px;color:var(--text3);letter-spacing:3px;margin-bottom:4px;}
-.ph-title{font-family:'Orbitron',sans-serif;font-size:19px;font-weight:700;color:var(--green);letter-spacing:3px;text-transform:uppercase;}
-.ph-sub{margin-top:4px;font-size:11px;color:var(--text2);letter-spacing:1px;}
-.ph{margin-bottom:22px;border-bottom:1px solid var(--border2);padding-bottom:14px;}
+.ph{margin-bottom:24px;}
+.ph-eyebrow{font-size:11px;font-weight:600;color:var(--blue-400);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.ph-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--white);letter-spacing:-.3px;}
+.ph-sub{margin-top:4px;font-size:13px;color:var(--text2);}
 
-/* ── STAT CARD ── */
-.card{background:var(--bg2);border:1px solid var(--border2);padding:18px;position:relative;}
-.card::before{content:'';position:absolute;top:-1px;left:-1px;width:11px;height:11px;border-top:2px solid var(--green);border-left:2px solid var(--green);}
-.card::after{content:'';position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-bottom:2px solid var(--green);border-right:2px solid var(--green);}
-.cl{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;}
-.cv{font-family:'Orbitron',sans-serif;font-size:30px;font-weight:700;color:var(--green);text-shadow:0 0 28px rgba(0,255,65,.35);}
-.cv.o{color:var(--orange);text-shadow:0 0 28px rgba(255,149,0,.35);}
-.cs{font-size:10px;color:var(--text2);margin-top:3px;}
+/* ── STAT CARDS ── */
+.stat-card{background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.stat-card.accent{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06);}
+.stat-label{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.3px;text-transform:uppercase;margin-bottom:8px;}
+.stat-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:var(--white);}
+.stat-val.blue{color:var(--blue-400);}
+.stat-val.orange{color:var(--orange);}
+.stat-val.green{color:var(--green);}
+.stat-change{font-size:12px;color:var(--text2);margin-top:4px;display:flex;align-items:center;gap:4px;}
+.stat-change .up{color:var(--green);font-weight:500;}
+.stat-change .down{color:var(--red);font-weight:500;}
 
-/* ── GRIDS ── */
+/* ── GRID ── */
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g21{display:grid;grid-template-columns:1fr 1.7fr;gap:14px;}
 
-/* ── SECTION TITLE ── */
-.st{font-size:10px;color:var(--text2);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
-.st::before{content:'//';color:var(--green3);}
+/* ── CARD ── */
+.card{background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title .ct-icon{width:20px;height:20px;border-radius:6px;background:rgba(59,130,246,.15);display:flex;align-items:center;justify-content:center;font-size:11px;}
 
 /* ── TABLE ── */
-.tt{width:100%;border-collapse:collapse;font-size:11px;}
-.tt th{background:var(--bg3);padding:7px 11px;text-align:left;font-size:9px;color:var(--text3);letter-spacing:2px;border-bottom:1px solid var(--border2);text-transform:uppercase;}
-.tt td{padding:9px 11px;border-bottom:1px solid var(--border);color:var(--text);}
-.tt tr:hover td{background:var(--bg3);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{padding:8px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.tbl td{padding:11px 12px;border-bottom:1px solid rgba(21,38,69,.6);color:var(--text);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(59,130,246,.04);}
 
-/* ── STATUS ── */
-.s{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;font-size:9px;letter-spacing:1px;text-transform:uppercase;}
-.s.active{background:rgba(0,255,65,.08);color:var(--green);border:1px solid var(--green3);}
-.s.pending{background:rgba(255,149,0,.08);color:var(--orange);border:1px solid rgba(255,149,0,.3);}
-.s.complete{background:rgba(68,153,255,.08);color:var(--blue);border:1px solid rgba(68,153,255,.3);}
-
-/* ── PROGRESS ── */
-.pbar{height:3px;background:var(--bg3);}
-.pfill{height:100%;background:var(--green);box-shadow:0 0 7px var(--green);transition:width .5s ease;}
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:500;}
+.badge.active{background:rgba(34,197,94,.1);color:#4ADE80;border:1px solid rgba(34,197,94,.2);}
+.badge.pending{background:rgba(249,115,22,.1);color:#FB923C;border:1px solid rgba(249,115,22,.2);}
+.badge.complete{background:rgba(59,130,246,.1);color:var(--blue-300);border:1px solid rgba(59,130,246,.2);}
+.badge.dot::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;}
 
 /* ── BTN ── */
-.btn{padding:9px 18px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1px solid var(--green3);background:transparent;color:var(--green2);transition:all .15s;}
-.btn:hover{background:var(--green4);color:var(--green);border-color:var(--green);box-shadow:0 0 18px rgba(0,255,65,.12);}
-.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:bold;}
-.btn.primary:hover{background:#33ff66;box-shadow:0 0 28px rgba(0,255,65,.38);}
+.btn{padding:8px 16px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all .15s;letter-spacing:.2px;}
+.btn:hover{background:var(--navy-700);color:var(--text);border-color:var(--slate-400);}
+.btn.primary{background:var(--blue-500);color:var(--white);border-color:var(--blue-500);}
+.btn.primary:hover{background:#2563EB;}
+.btn.sm{padding:5px 12px;font-size:11px;}
+.btn.ghost{border-color:transparent;background:transparent;}
+.btn.ghost:hover{background:var(--navy-800);}
 
 /* ── FORM ── */
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
-.field label{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;}
-.field input,.field select,.field textarea{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:9px 11px;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;transition:border-color .15s;}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green3);}
-.field select option{background:var(--bg3);}
+.field label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.3px;}
+.field input,.field select,.field textarea{background:var(--navy-900);border:1px solid var(--border);color:var(--text);padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;border-radius:8px;transition:border-color .15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+.field select option{background:var(--navy-900);}
 
 /* ── OPERATOR CARD ── */
-.op-card{background:var(--bg2);border:1px solid var(--border2);padding:15px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
-.op-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),transparent);}
-.op-card:hover{border-color:var(--green3);background:var(--bg3);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 18px rgba(0,255,65,.05);}
-.callsign{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--green);letter-spacing:2px;}
-.op-branch{font-size:10px;color:var(--orange);letter-spacing:1px;margin-top:2px;}
-.spec-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
-.spec{padding:2px 5px;font-size:8px;letter-spacing:1px;background:var(--green4);color:var(--green2);border:1px solid var(--green3);text-transform:uppercase;}
-.op-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
-.osl{font-size:8px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
-.osv{font-family:'Orbitron',sans-serif;font-size:15px;color:var(--text);margin-top:1px;}
+.op-card{background:var(--navy-800);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;}
+.op-card:hover{border-color:rgba(59,130,246,.4);box-shadow:0 4px 24px rgba(0,0,0,.3),0 0 0 1px rgba(59,130,246,.1);}
+.op-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--navy-600),var(--blue-500));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--white);flex-shrink:0;}
+.callsign{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--white);}
+.op-branch{font-size:11px;color:var(--blue-300);font-weight:500;margin-top:2px;}
+.spec{display:inline-block;padding:2px 7px;font-size:10px;font-weight:500;background:rgba(59,130,246,.1);color:var(--blue-300);border:1px solid rgba(59,130,246,.2);border-radius:4px;}
+.op-stat-label{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+.op-stat-val{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--white);margin-top:2px;}
 
 /* ── STEPS ── */
-.steps{display:flex;align-items:center;margin-bottom:28px;}
+.steps{display:flex;align-items:center;margin-bottom:28px;gap:0;}
 .step{display:flex;align-items:center;gap:8px;flex:1;}
-.sn{width:27px;height:27px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:10px;color:var(--text3);flex-shrink:0;}
-.step.active .sn{border-color:var(--green);color:var(--green);box-shadow:0 0 12px rgba(0,255,65,.25);}
-.step.done .sn{background:var(--green);border-color:var(--green);color:var(--bg);}
-.sl{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
-.step.active .sl{color:var(--green);}
-.step.done .sl{color:var(--text2);}
-.sline{height:1px;background:var(--border2);flex:1;max-width:36px;}
-.step.done~.sline{background:var(--green3);}
+.step-num{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text3);flex-shrink:0;transition:all .2s;}
+.step.active .step-num{border-color:var(--blue-500);color:var(--blue-400);background:rgba(59,130,246,.1);}
+.step.done .step-num{background:var(--blue-500);border-color:var(--blue-500);color:var(--white);}
+.step-label{font-size:11px;font-weight:500;color:var(--text3);white-space:nowrap;}
+.step.active .step-label{color:var(--blue-400);}
+.step.done .step-label{color:var(--text2);}
+.step-line{height:1.5px;flex:1;background:var(--border);transition:background .2s;max-width:40px;}
+.step.done+.step-line,.done-line{background:var(--blue-500);}
 
 /* ── FEED ── */
-.fi{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px;}
-.ft{font-size:9px;color:var(--text3);min-width:70px;letter-spacing:1px;}
-.fm{color:var(--text2);flex:1;line-height:1.6;}
-.fm strong{color:var(--green);}
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(21,38,69,.6);}
+.feed-item:last-child{border-bottom:none;}
+.feed-time{font-size:11px;color:var(--text3);min-width:64px;font-family:'Space Grotesk',sans-serif;}
+.feed-text{font-size:12px;color:var(--text2);flex:1;line-height:1.6;}
+.feed-text strong{color:var(--blue-300);font-weight:500;}
 
 /* ── MISSION TYPE ── */
-.mt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
-.mt{border:1px solid var(--border2);padding:15px 10px;text-align:center;cursor:pointer;transition:all .15s;}
-.mt:hover{border-color:var(--green3);background:var(--bg3);}
-.mt.sel{border-color:var(--green);background:var(--green4);}
-.mt-icon{font-size:22px;margin-bottom:7px;}
-.mt-label{font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;}
-.mt.sel .mt-label{color:var(--green);}
+.mt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.mt-card{border:1.5px solid var(--border);border-radius:10px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .15s;background:var(--navy-900);}
+.mt-card:hover{border-color:rgba(59,130,246,.4);background:var(--navy-800);}
+.mt-card.sel{border-color:var(--blue-500);background:rgba(59,130,246,.08);}
+.mt-icon{font-size:24px;margin-bottom:8px;}
+.mt-label{font-size:11px;font-weight:500;color:var(--text2);}
+.mt-card.sel .mt-label{color:var(--blue-400);}
 
-/* ── SEC LEVELS ── */
-.sec-wrap{display:flex;gap:7px;margin-bottom:14px;}
-.sl-btn{flex:1;padding:7px;border:1px solid var(--border2);text-align:center;cursor:pointer;font-size:9px;letter-spacing:1px;font-family:'Share Tech Mono',monospace;transition:all .15s;background:transparent;color:var(--text2);}
-.sl-btn:hover{border-color:var(--green3);}
-.sl-btn.sel{border-color:var(--green);background:var(--green4);color:var(--green);}
-.sl-btn.o.sel{border-color:var(--orange);background:rgba(255,149,0,.08);color:var(--orange);}
-.sl-btn.r.sel{border-color:var(--red);background:rgba(255,53,53,.08);color:var(--red);}
+/* ── SEC LEVEL ── */
+.sec-wrap{display:flex;gap:8px;margin-bottom:14px;}
+.sec-btn{flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;text-align:center;cursor:pointer;font-size:11px;font-weight:500;font-family:'Inter',sans-serif;transition:all .15s;background:transparent;color:var(--text2);}
+.sec-btn:hover{border-color:var(--slate-400);}
+.sec-btn.sel{border-color:var(--blue-500);background:rgba(59,130,246,.1);color:var(--blue-400);}
+.sec-btn.sel.o{border-color:var(--orange);background:rgba(249,115,22,.08);color:#FB923C;}
+.sec-btn.sel.r{border-color:var(--red);background:rgba(239,68,68,.08);color:#F87171;}
 
 /* ── INTEL ── */
-.ic{background:var(--bg2);border:1px solid var(--border2);padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;display:flex;gap:14px;align-items:flex-start;}
-.ic:hover{border-color:var(--green3);background:var(--bg3);}
-.ii{width:38px;height:38px;background:var(--green4);border:1px solid var(--green3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.it{font-size:12px;color:var(--text);letter-spacing:.5px;margin-bottom:3px;}
-.id-{font-size:10px;color:var(--text2);line-height:1.6;}
-.itag{display:inline-block;padding:2px 5px;font-size:8px;letter-spacing:1px;margin-top:5px;font-family:'Share Tech Mono',monospace;}
+.intel-card{background:var(--navy-800);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .15s;display:flex;gap:14px;align-items:flex-start;margin-bottom:10px;}
+.intel-card:hover{border-color:rgba(59,130,246,.3);}
+.intel-icon{width:40px;height:40px;border-radius:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.intel-title{font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.intel-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+.intel-tag{display:inline-block;padding:2px 7px;font-size:10px;font-weight:500;border-radius:4px;margin-top:6px;}
 
 /* ── MAP ── */
-.map-c{background:var(--bg3);border:1px solid var(--border2);position:relative;height:440px;overflow:hidden;}
-.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,65,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.05) 1px,transparent 1px);background-size:30px 30px;}
-.scan{position:absolute;inset:0;background:linear-gradient(transparent 0%,rgba(0,255,65,.025) 50%,transparent 100%);background-size:100% 6px;animation:scanmove 5s linear infinite;pointer-events:none;}
-@keyframes scanmove{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+.map-wrap{background:var(--navy-900);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;height:420px;}
+.map-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.06) 1px,transparent 1px);background-size:36px 36px;}
+.map-scan{position:absolute;inset:0;background:linear-gradient(to bottom,transparent,rgba(59,130,246,.03) 50%,transparent);animation:scan 4s ease-in-out infinite;pointer-events:none;}
+@keyframes scan{0%,100%{transform:translateY(-60%)}50%{transform:translateY(60%)}}
+.map-label{position:absolute;font-size:10px;color:var(--text3);font-family:'Space Grotesk',sans-serif;letter-spacing:.5px;}
 
 /* ── LOGIN ── */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;}
-.login-box{width:460px;background:var(--bg2);border:1px solid var(--border2);padding:38px;position:relative;}
-.login-box::before{content:'';position:absolute;top:-1px;left:-1px;width:18px;height:18px;border-top:2px solid var(--green);border-left:2px solid var(--green);}
-.login-box::after{content:'';position:absolute;bottom:-1px;right:-1px;width:18px;height:18px;border-bottom:2px solid var(--green);border-right:2px solid var(--green);}
-.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0;}
-.rc{border:1px solid var(--border2);padding:18px;text-align:center;cursor:pointer;transition:all .2s;}
-.rc:hover{border-color:var(--green3);background:var(--bg3);}
-.rc.sel{border-color:var(--green);background:var(--green4);}
-.ri{font-size:26px;margin-bottom:7px;}
-.rt{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--green);letter-spacing:2px;text-transform:uppercase;}
-.rd{font-size:9px;color:var(--text2);margin-top:3px;letter-spacing:1px;}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy-950);position:relative;}
+.login-glow{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(59,130,246,.08) 0%,transparent 70%);pointer-events:none;}
+.login-box{width:440px;background:var(--navy-900);border:1px solid var(--border);border-radius:16px;padding:36px;position:relative;z-index:1;}
+.login-logo{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--white);text-align:center;margin-bottom:6px;}
+.login-logo em{color:var(--blue-400);font-style:normal;}
+.login-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:28px;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0;}
+.role-card{border:1.5px solid var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--navy-800);}
+.role-card:hover{border-color:rgba(59,130,246,.4);}
+.role-card.sel{border-color:var(--blue-500);background:rgba(59,130,246,.08);}
+.role-icon{font-size:28px;margin-bottom:8px;}
+.role-title{font-size:13px;font-weight:600;color:var(--white);}
+.role-desc{font-size:11px;color:var(--text2);margin-top:3px;}
+.role-card.sel .role-title{color:var(--blue-400);}
 
 /* ── UTILS ── */
-.sep{height:1px;background:var(--border2);margin:18px 0;}
-.flex{display:flex;}.flex-c{display:flex;align-items:center;}.flex-b{display:flex;align-items:center;justify-content:space-between;}
-.gap8{gap:8px;}.gap12{gap:12px;}.gap16{gap:16px;}
-.mb8{margin-bottom:8px;}.mb16{margin-bottom:16px;}.mb22{margin-bottom:22px;}.mt16{margin-top:16px;}
-.tg{color:var(--green);}.to{color:var(--orange);}.td{color:var(--text2);}.ts{font-size:10px;}
-.orb{font-family:'Orbitron',sans-serif;}
-::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--green3);}
+.flex{display:flex;}.fc{display:flex;align-items:center;}.fb{display:flex;align-items:center;justify-content:space-between;}
+.gap6{gap:6px;}.gap8{gap:8px;}.gap12{gap:12px;}
+.mb8{margin-bottom:8px;}.mb14{margin-bottom:14px;}.mb20{margin-bottom:20px;}.mt12{margin-top:12px;}.mt16{margin-top:16px;}
+.text-blue{color:var(--blue-400);}.text-muted{color:var(--text2);}.text-white{color:var(--white);}
+.sg{font-family:'Space Grotesk',sans-serif;}
+.sep{height:1px;background:var(--border);margin:18px 0;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 `;
 
-// ─────────────────────────────────────────────
-// MOCK DATA
-// ─────────────────────────────────────────────
+// ─── DATA ───
 const OPERATORS = [
-  { id:1, callsign:"GHOST-7",  name:"황찬희", branch:"특전사 드론봇",   specs:["전술정찰","야간촬영","수색"], hours:847,  rating:4.9, missions:62,  status:"available", region:"서울/경기" },
-  { id:2, callsign:"IRON-2",   name:"김도현", branch:"드론봇전투단",    specs:["시설점검","측량","3D맵핑"],   hours:1240, rating:4.8, missions:98,  status:"mission",   region:"수도권" },
-  { id:3, callsign:"EAGLE-5",  name:"박지수", branch:"육군항공",        specs:["항공촬영","지형분석","행사"], hours:560,  rating:4.7, missions:41,  status:"available", region:"부산/경남" },
-  { id:4, callsign:"HAWK-3",   name:"이민준", branch:"해병대 수색대",   specs:["해안촬영","보안시설","정찰"], hours:920,  rating:5.0, missions:77,  status:"standby",   region:"인천/경기" },
-  { id:5, callsign:"VIPER-1",  name:"최성호", branch:"공군정보단",      specs:["정밀측량","3D맵핑","보안"],   hours:1540, rating:4.9, missions:134, status:"available", region:"전국" },
-  { id:6, callsign:"SCOUT-9",  name:"정우진", branch:"드론봇전투단",    specs:["농업방제","농지측량","산림"], hours:730,  rating:4.6, missions:55,  status:"mission",   region:"전북/전남" },
+  { id:1, callsign:"GHOST-7", name:"황찬희", branch:"특전사 드론봇", specs:["전술정찰","야간촬영","수색"], hours:847,  rating:4.9, missions:62,  status:"available", region:"서울/경기", initials:"황찬" },
+  { id:2, callsign:"IRON-2",  name:"김도현", branch:"드론봇전투단", specs:["시설점검","측량","3D맵핑"],  hours:1240, rating:4.8, missions:98,  status:"mission",   region:"수도권",   initials:"김도" },
+  { id:3, callsign:"EAGLE-5", name:"박지수", branch:"육군항공",     specs:["항공촬영","지형분석","행사"],hours:560,  rating:4.7, missions:41,  status:"available", region:"부산/경남",initials:"박지" },
+  { id:4, callsign:"HAWK-3",  name:"이민준", branch:"해병대 수색대",specs:["해안촬영","보안시설","정찰"],hours:920,  rating:5.0, missions:77,  status:"standby",   region:"인천/경기",initials:"이민" },
+  { id:5, callsign:"VIPER-1", name:"최성호", branch:"공군정보단",   specs:["정밀측량","3D맵핑","보안"],  hours:1540, rating:4.9, missions:134, status:"available", region:"전국",     initials:"최성" },
+  { id:6, callsign:"SCOUT-9", name:"정우진", branch:"드론봇전투단", specs:["농업방제","농지측량","산림"],hours:730,  rating:4.6, missions:55,  status:"mission",   region:"전북/전남",initials:"정우" },
 ];
 
 const MISSIONS = [
-  { id:"MSN-0047", type:"측량", title:"강남구 건설현장 측량",    client:"(주)대건건설",      op:"IRON-2",  status:"active",   budget:850000,  date:"2026.04.09", region:"서울 강남구" },
-  { id:"MSN-0046", type:"촬영", title:"해운대 행사 항공촬영",    client:"부산시청",           op:"-",       status:"pending",  budget:500000,  date:"2026.04.12", region:"부산 해운대" },
-  { id:"MSN-0045", type:"점검", title:"인천항 시설 보안점검",    client:"인천항만공사",       op:"GHOST-7", status:"complete", budget:1200000, date:"2026.04.07", region:"인천 중구" },
-  { id:"MSN-0044", type:"방제", title:"김제 농지 방제작업",      client:"김제시 농업기술센터",op:"SCOUT-9", status:"complete", budget:320000,  date:"2026.04.06", region:"전북 김제" },
-  { id:"MSN-0043", type:"촬영", title:"용인 드론 레이싱 행사",   client:"K-드론리그",         op:"EAGLE-5", status:"active",   budget:450000,  date:"2026.04.09", region:"경기 용인" },
+  { id:"MSN-0047", type:"측량", title:"강남구 건설현장 측량",   client:"(주)대건건설",    op:"IRON-2",  status:"active",   budget:850000,  date:"2026.04.09", region:"서울 강남" },
+  { id:"MSN-0046", type:"촬영", title:"해운대 행사 항공촬영",   client:"부산시청",         op:"-",       status:"pending",  budget:500000,  date:"2026.04.12", region:"부산 해운대" },
+  { id:"MSN-0045", type:"점검", title:"인천항 시설 보안점검",   client:"인천항만공사",     op:"GHOST-7", status:"complete", budget:1200000, date:"2026.04.07", region:"인천 중구" },
+  { id:"MSN-0044", type:"방제", title:"김제 농지 방제작업",     client:"김제시 농업기술센터",op:"SCOUT-9",status:"complete", budget:320000,  date:"2026.04.06", region:"전북 김제" },
+  { id:"MSN-0043", type:"촬영", title:"용인 드론 레이싱 행사", client:"K-드론리그",       op:"EAGLE-5", status:"active",   budget:450000,  date:"2026.04.09", region:"경기 용인" },
 ];
 
 const FEED = [
-  { time:"14:23:07", text:"GHOST-7 — 서울 강남 측량 미션 수락 확인",          bold:"GHOST-7" },
-  { time:"14:18:42", text:"새 미션 등록: 부산 해운대 항공촬영 (예산 50만원)",  bold:"부산 해운대 항공촬영" },
-  { time:"13:55:21", text:"IRON-2 — 인천 보안시설 미션 완료 (★4.8)",          bold:"IRON-2" },
-  { time:"13:41:09", text:"HAWK-3 파일럿 인증 승인 완료",                      bold:"HAWK-3" },
-  { time:"13:20:33", text:"새 미션 등록: 경기 용인 레이싱 촬영 (예산 30만원)", bold:"경기 용인 레이싱 촬영" },
-  { time:"12:47:15", text:"VIPER-1 — B2B 계약 협의 중 (지자체 측량 프로젝트)",bold:"VIPER-1" },
+  { time:"14:23", text:"GHOST-7 — 서울 강남 측량 미션 수락",      bold:"GHOST-7" },
+  { time:"14:18", text:"새 의뢰 등록: 부산 해운대 항공촬영 50만원", bold:"부산 해운대" },
+  { time:"13:55", text:"IRON-2 — 인천 보안점검 완료 (★4.8)",      bold:"IRON-2" },
+  { time:"13:41", text:"HAWK-3 파일럿 인증 승인",                   bold:"HAWK-3" },
+  { time:"13:20", text:"새 의뢰 등록: 용인 레이싱 촬영 30만원",    bold:"용인 레이싱" },
+  { time:"12:47", text:"VIPER-1 — 지자체 측량 계약 협의 중",       bold:"VIPER-1" },
 ];
 
-function FeedMsg({ text, bold }) {
-  if (!bold || !text.includes(bold)) return <span style={{color:"var(--text2)"}}>{text}</span>;
-  const [before, after] = text.split(bold);
-  return <span style={{color:"var(--text2)"}}>{before}<strong style={{color:"var(--green)"}}>{bold}</strong>{after}</span>;
-}
-
-// ─────────────────────────────────────────────
-// COMMAND CENTER
-// ─────────────────────────────────────────────
+// ─── COMMAND CENTER ───
 function CommandCenter() {
   const stats = [
-    { label:"ACTIVE OPERATORS", value:"24",   sub:"↑ 3 vs yesterday",      col:"" },
-    { label:"ONGOING MISSIONS",  value:"07",   sub:"2건 오늘 완료 예정",    col:"o" },
-    { label:"TOTAL MISSIONS",    value:"847",  sub:"이번 달 +63건",         col:"" },
-    { label:"PLATFORM UPTIME",   value:"99.7%",sub:"Last 30 days",         col:"" },
+    { label:"투입 가능 파일럿", val:"24명",   change:"+3 어제 대비", up:true,   blue:true },
+    { label:"진행 중 미션",      val:"7건",    change:"오늘 2건 완료 예정", up:false, blue:false },
+    { label:"이달 총 거래",      val:"₩18.4M", change:"+23% 전월 대비", up:true,  blue:false },
+    { label:"플랫폼 업타임",     val:"99.7%",  change:"최근 30일",      up:true,  blue:false },
   ];
 
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEFORCE // TACTICAL OPERATIONS CENTER</div>
-        <div className="ph-title">⬡ COMMAND CENTER</div>
-        <div className="ph-sub">실시간 플랫폼 현황 모니터링</div>
+        <div className="ph-eyebrow">Dashboard</div>
+        <div className="ph-title sg">운영 현황 Overview</div>
+        <div className="ph-sub">실시간 플랫폼 상태 모니터링</div>
       </div>
 
-      {/* STAT CARDS */}
-      <div className="g4 mb22">
+      <div className="g4 mb20">
         {stats.map((s,i) => (
-          <div key={i} className="card">
-            <div className="cl">{s.label}</div>
-            <div className={`cv ${s.col}`}>{s.value}</div>
-            <div className="cs">{s.sub}</div>
+          <div key={i} className={`stat-card ${s.blue?"accent":""}`}>
+            <div className="stat-label">{s.label}</div>
+            <div className={`stat-val ${s.blue?"blue":""}`}>{s.val}</div>
+            <div className="stat-change">
+              <span className={s.up?"up":"down"}>{s.up?"↑":"↓"}</span>
+              {s.change}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* FEED + FORCE READINESS */}
-      <div className="g2 mb22">
-        <div>
-          <div className="st">LIVE ACTIVITY FEED</div>
-          <div style={{background:"var(--bg2)",border:"1px solid var(--border2)",padding:"14px"}}>
-            {FEED.map((f,i) => (
-              <div key={i} className="fi">
-                <div className="ft">{f.time}</div>
-                <div className="fm"><FeedMsg text={f.text} bold={f.bold} /></div>
+      <div className="g21 mb20">
+        {/* 활동 피드 */}
+        <div className="card">
+          <div className="card-title"><div className="ct-icon">📡</div>실시간 활동</div>
+          {FEED.map((f,i) => (
+            <div key={i} className="feed-item">
+              <div className="feed-time">{f.time}</div>
+              <div className="feed-text">
+                {f.bold && f.text.includes(f.bold)
+                  ? <>{f.text.split(f.bold)[0]}<strong>{f.bold}</strong>{f.text.split(f.bold)[1]}</>
+                  : f.text
+                }
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        <div>
-          <div className="st">FORCE READINESS</div>
-          <div style={{background:"var(--bg2)",border:"1px solid var(--border2)",padding:"14px"}}>
-            {OPERATORS.map(op => {
-              const col = op.status==="available" ? "var(--green)" : op.status==="mission" ? "var(--orange)" : "#666";
-              const lbl = op.status==="available" ? "READY" : op.status==="mission" ? "ON MISSION" : "STANDBY";
-              return (
-                <div key={op.id} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid var(--border)"}}>
-                  <div style={{width:7,height:7,borderRadius:"50%",background:col,flexShrink:0,boxShadow:`0 0 6px ${col}`}} />
-                  <div style={{flex:1}}>
-                    <div className="orb" style={{fontSize:10,color:"var(--green)",letterSpacing:1}}>{op.callsign}</div>
-                    <div style={{fontSize:9,color:"var(--text3)",marginTop:1}}>{op.branch}</div>
-                  </div>
-                  <div style={{textAlign:"right"}}>
-                    <div style={{fontSize:9,color:col,letterSpacing:1,textTransform:"uppercase"}}>{lbl}</div>
-                    <div style={{fontSize:8,color:"var(--text3)",marginTop:1}}>{op.hours}H LOGGED</div>
-                  </div>
+        {/* 파일럿 현황 */}
+        <div className="card">
+          <div className="card-title"><div className="ct-icon">👨‍✈️</div>파일럿 현황</div>
+          {OPERATORS.map(op => {
+            const col = op.status==="available" ? "var(--green)" : op.status==="mission" ? "var(--orange)" : "var(--text3)";
+            const lbl = op.status==="available" ? "대기" : op.status==="mission" ? "미션 중" : "준비 중";
+            return (
+              <div key={op.id} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:"1px solid rgba(21,38,69,.6)"}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:col,flexShrink:0}} />
+                <div style={{flex:1}}>
+                  <div className="sg" style={{fontSize:13,color:"var(--white)",fontWeight:600}}>{op.callsign}</div>
+                  <div style={{fontSize:11,color:"var(--text3)",marginTop:1}}>{op.branch}</div>
                 </div>
-              );
-            })}
-          </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:11,color:col,fontWeight:500}}>{lbl}</div>
+                  <div style={{fontSize:10,color:"var(--text3)",marginTop:1}}>{op.hours}H</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* MISSIONS TABLE */}
-      <div className="st">RECENT MISSIONS</div>
-      <div style={{background:"var(--bg2)",border:"1px solid var(--border2)"}}>
-        <table className="tt">
+      {/* 미션 테이블 */}
+      <div className="card" style={{padding:0,overflow:"hidden"}}>
+        <div style={{padding:"16px 20px 12px",borderBottom:"1px solid var(--border)"}}>
+          <div className="card-title" style={{margin:0}}><div className="ct-icon">📋</div>최근 미션</div>
+        </div>
+        <table className="tbl">
           <thead>
-            <tr>
-              <th>MISSION ID</th><th>TYPE</th><th>DESIGNATION</th>
-              <th>CLIENT</th><th>OPERATOR</th><th>BUDGET</th><th>STATUS</th>
-            </tr>
+            <tr><th>ID</th><th>유형</th><th>미션명</th><th>클라이언트</th><th>파일럿</th><th>예산</th><th>상태</th></tr>
           </thead>
           <tbody>
             {MISSIONS.map(m => (
               <tr key={m.id}>
-                <td className="orb" style={{fontSize:10,color:"var(--green)"}}>{m.id}</td>
-                <td><span style={{fontSize:9,padding:"2px 5px",background:"var(--green4)",color:"var(--green2)",border:"1px solid var(--green3)"}}>{m.type}</span></td>
-                <td>{m.title}</td>
-                <td className="ts td">{m.client}</td>
-                <td className="orb" style={{fontSize:10,color:m.op==="-"?"var(--text3)":"var(--text)"}}>{m.op}</td>
-                <td className="to">₩{m.budget.toLocaleString()}</td>
+                <td className="sg" style={{fontSize:12,color:"var(--blue-300)",fontWeight:600}}>{m.id}</td>
+                <td><span className="spec">{m.type}</span></td>
+                <td style={{fontWeight:500}}>{m.title}</td>
+                <td style={{color:"var(--text2)",fontSize:12}}>{m.client}</td>
+                <td className="sg" style={{fontSize:12,fontWeight:600,color:m.op==="-"?"var(--text3)":"var(--white)"}}>{m.op}</td>
+                <td style={{color:"var(--orange)",fontWeight:500,fontSize:12}}>₩{m.budget.toLocaleString()}</td>
                 <td>
-                  <span className={`s ${m.status==="active"?"active":m.status==="pending"?"pending":"complete"}`}>
-                    {m.status==="active"?"● 진행중":m.status==="pending"?"◌ 견적대기":"✓ 완료"}
+                  <span className={`badge dot ${m.status==="active"?"active":m.status==="pending"?"pending":"complete"}`}>
+                    {m.status==="active"?"진행중":m.status==="pending"?"견적대기":"완료"}
                   </span>
                 </td>
               </tr>
@@ -323,209 +332,167 @@ function CommandCenter() {
   );
 }
 
-// ─────────────────────────────────────────────
-// MISSION BRIEFING
-// ─────────────────────────────────────────────
+// ─── MISSION BRIEFING ───
 function MissionBriefing() {
-  const [step, setStep]         = useState(1);
-  const [mType, setMType]       = useState(null);
-  const [sec, setSec]           = useState("general");
-  const [submitted, setSubmit]  = useState(false);
+  const [step, setStep]       = useState(1);
+  const [mType, setMType]     = useState(null);
+  const [sec, setSec]         = useState("general");
+  const [submitted, setSubmit]= useState(false);
 
-  const STEPS = [
-    {n:1,l:"MISSION TYPE"},
-    {n:2,l:"LOCATION / DATE"},
-    {n:3,l:"BUDGET / SPECS"},
-    {n:4,l:"CONFIRM"},
-  ];
-
-  const TYPES = [
-    {id:"photo",   icon:"📷", label:"항공촬영"},
-    {id:"survey",  icon:"📐", label:"측량·맵핑"},
-    {id:"inspect", icon:"🔍", label:"시설점검"},
-    {id:"other",   icon:"⚡", label:"기타임무"},
-  ];
+  const STEPS = [{n:1,l:"미션 유형"},{n:2,l:"위치/일정"},{n:3,l:"예산/장비"},{n:4,l:"최종 확인"}];
+  const TYPES = [{id:"photo",icon:"📷",label:"항공촬영"},{id:"survey",icon:"📐",label:"측량·맵핑"},{id:"inspect",icon:"🔍",label:"시설점검"},{id:"other",icon:"⚡",label:"기타"}];
 
   if (submitted) return (
-    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:400,gap:20,textAlign:"center"}}>
-      <div style={{fontFamily:"Orbitron",fontSize:40,color:"var(--green)",textShadow:"0 0 30px rgba(0,255,65,.5)"}}>✓</div>
-      <div className="orb" style={{fontSize:18,color:"var(--green)",letterSpacing:3}}>MISSION SUBMITTED</div>
-      <div className="ts td">인증된 파일럿들에게 알림이 발송되었습니다.</div>
-      <div style={{fontSize:11,color:"var(--text2)"}}>새 미션 ID: <span className="tg orb">MSN-0048</span></div>
-      <button className="btn primary" onClick={() => { setSubmit(false); setStep(1); setMType(null); }}>+ NEW MISSION</button>
+    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:400,gap:16,textAlign:"center"}}>
+      <div style={{width:60,height:60,borderRadius:"50%",background:"rgba(34,197,94,.1)",border:"1.5px solid var(--green)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>✓</div>
+      <div className="sg" style={{fontSize:20,fontWeight:700,color:"var(--white)"}}>의뢰 등록 완료</div>
+      <div style={{fontSize:13,color:"var(--text2)"}}>인증된 파일럿들에게 알림이 발송되었습니다</div>
+      <div style={{padding:"8px 20px",background:"rgba(59,130,246,.08)",border:"1px solid rgba(59,130,246,.2)",borderRadius:8,fontSize:12,color:"var(--blue-300)"}}>미션 ID: MSN-0048</div>
+      <button className="btn primary" style={{marginTop:8}} onClick={() => { setSubmit(false); setStep(1); setMType(null); }}>+ 새 의뢰 등록</button>
     </div>
   );
 
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEFORCE // COMMAND</div>
-        <div className="ph-title">✦ MISSION BRIEFING</div>
-        <div className="ph-sub">임무 의뢰 등록 — 소요시간 약 5분</div>
+        <div className="ph-eyebrow">Mission Briefing</div>
+        <div className="ph-title sg">드론 서비스 의뢰</div>
+        <div className="ph-sub">총 4단계 · 소요 시간 약 5분</div>
       </div>
 
-      {/* STEP BAR */}
+      {/* STEPS */}
       <div className="steps">
         {STEPS.map((s,i) => (
           <div key={s.n} style={{display:"flex",alignItems:"center",flex:1,gap:0}}>
-            <div style={{display:"flex",alignItems:"center",gap:7,flex:1}}>
-              <div className={`sn ${step===s.n?"active":""} ${step>s.n?"done":""}`}>{step>s.n?"✓":s.n}</div>
-              <div className={`sl ${step===s.n?"active":""} ${step>s.n?"done":""}`}>{s.l}</div>
+            <div style={{display:"flex",alignItems:"center",gap:8,flex:1}}>
+              <div className={`step-num ${step===s.n?"active":""} ${step>s.n?"done":""}`}>{step>s.n?"✓":s.n}</div>
+              <div className={`step-label ${step===s.n?"active":""} ${step>s.n?"done":""}`}>{s.l}</div>
             </div>
-            {i<STEPS.length-1 && <div className="sline" style={{background:step>s.n?"var(--green3)":"var(--border2)"}} />}
+            {i<STEPS.length-1 && <div className="step-line" style={{background:step>s.n?"var(--blue-500)":"var(--border)"}} />}
           </div>
         ))}
       </div>
 
       {/* STEP 1 */}
       {step===1 && (
-        <div>
-          <div className="st">임무 유형 선택</div>
+        <div className="card">
+          <div className="card-title mb14"><div className="ct-icon">🎯</div>서비스 유형 선택</div>
           <div className="mt-grid">
             {TYPES.map(t => (
-              <div key={t.id} className={`mt ${mType===t.id?"sel":""}`} onClick={() => setMType(t.id)}>
+              <div key={t.id} className={`mt-card ${mType===t.id?"sel":""}`} onClick={() => setMType(t.id)}>
                 <div className="mt-icon">{t.icon}</div>
                 <div className="mt-label">{t.label}</div>
               </div>
             ))}
           </div>
           <div className="sep" />
-          <div className="flex-b">
-            <div />
-            <button className="btn primary" style={{opacity:mType?1:.4}} onClick={() => mType && setStep(2)}>NEXT: LOCATION ▶</button>
-          </div>
+          <div className="fb"><div /><button className="btn primary" style={{opacity:mType?1:.4}} onClick={() => mType&&setStep(2)}>다음 단계 →</button></div>
         </div>
       )}
 
       {/* STEP 2 */}
       {step===2 && (
-        <div>
-          <div className="st">임무 위치 및 일정</div>
+        <div className="card">
+          <div className="card-title mb14"><div className="ct-icon">📍</div>위치 및 일정</div>
           <div className="g2">
             <div>
-              <div className="field"><label>임무 명칭 (MISSION DESIGNATION)</label><input type="text" placeholder="예: 강남구 건설현장 측량 작업" /></div>
-              <div className="field"><label>임무 위치 (GRID REFERENCE)</label><input type="text" placeholder="주소 또는 좌표" /></div>
-              <div className="field"><label>임무 일자 (D-DAY)</label><input type="date" /></div>
-              <div className="field">
-                <label>작전 시간 (OPERATION WINDOW)</label>
-                <div style={{display:"flex",gap:8}}>
-                  <input type="time" style={{flex:1,background:"var(--bg3)",border:"1px solid var(--border2)",color:"var(--text)",padding:"9px 11px",fontFamily:"Share Tech Mono",fontSize:11,outline:"none"}} />
-                  <input type="time" style={{flex:1,background:"var(--bg3)",border:"1px solid var(--border2)",color:"var(--text)",padding:"9px 11px",fontFamily:"Share Tech Mono",fontSize:11,outline:"none"}} />
-                </div>
-              </div>
+              <div className="field"><label>의뢰 제목</label><input type="text" placeholder="예: 강남구 건설현장 측량" /></div>
+              <div className="field"><label>위치</label><input type="text" placeholder="주소 또는 지역명" /></div>
+              <div className="field"><label>작업 일자</label><input type="date" /></div>
             </div>
             <div>
-              <div className="field">
-                <label>고도 요구사항 (ALTITUDE REQ)</label>
+              <div className="field"><label>고도 요구사항</label>
                 <select>
-                  <option>제한 없음</option>
-                  <option>150m 이하 (일반)</option>
+                  <option>제한 없음 (150m 이하)</option>
                   <option>150~300m (허가 필요)</option>
                   <option>300m 이상 (특수 허가)</option>
                 </select>
               </div>
               <div style={{marginBottom:14}}>
-                <div style={{fontSize:9,color:"var(--text3)",letterSpacing:2,textTransform:"uppercase",marginBottom:7}}>보안 등급 (SECURITY CLEARANCE)</div>
+                <div style={{fontSize:11,fontWeight:500,color:"var(--text2)",marginBottom:8}}>보안 등급</div>
                 <div className="sec-wrap">
-                  {[{id:"general",label:"GENERAL",cls:""},{id:"restricted",label:"RESTRICTED",cls:"o"},{id:"classified",label:"CLASSIFIED",cls:"r"}].map(s => (
-                    <button key={s.id} className={`sl-btn ${s.cls} ${sec===s.id?"sel":""}`} onClick={() => setSec(s.id)}>{s.label}</button>
+                  {[{id:"general",l:"일반",cls:""},{id:"restricted",l:"제한",cls:"o"},{id:"classified",l:"기밀",cls:"r"}].map(s => (
+                    <button key={s.id} className={`sec-btn ${sec===s.id?"sel "+s.cls:""}`} onClick={() => setSec(s.id)}>{s.l}</button>
                   ))}
                 </div>
               </div>
-              <div className="field">
-                <label>특이사항 (SPECIAL NOTES)</label>
-                <textarea rows={4} placeholder="접근 제한, 장비 요구사항, 기타 임무 특이사항" style={{resize:"none"}} />
-              </div>
+              <div className="field"><label>특이사항</label><textarea rows={3} placeholder="접근 제한, 장비 요구사항 등" style={{resize:"none"}} /></div>
             </div>
           </div>
           <div className="sep" />
-          <div className="flex-b">
-            <button className="btn" onClick={() => setStep(1)}>◀ BACK</button>
-            <button className="btn primary" onClick={() => setStep(3)}>NEXT: BUDGET ▶</button>
+          <div className="fb">
+            <button className="btn" onClick={() => setStep(1)}>← 이전</button>
+            <button className="btn primary" onClick={() => setStep(3)}>다음 단계 →</button>
           </div>
         </div>
       )}
 
       {/* STEP 3 */}
       {step===3 && (
-        <div>
-          <div className="st">예산 및 장비 요구사항</div>
+        <div className="card">
+          <div className="card-title mb14"><div className="ct-icon">💰</div>예산 및 장비</div>
           <div className="g2">
             <div>
-              <div className="field"><label>최대 예산 (MAX BUDGET)</label><input type="number" placeholder="예: 500000 (원)" /></div>
-              <div className="field">
-                <label>매칭 방식 (MATCHING MODE)</label>
+              <div className="field"><label>최대 예산 (원)</label><input type="number" placeholder="500000" /></div>
+              <div className="field"><label>매칭 방식</label>
                 <select>
                   <option>공개 입찰 (오픈 비딩)</option>
                   <option>파일럿 지정 초대</option>
-                  <option>AI 자동 추천 매칭</option>
+                  <option>AI 자동 추천</option>
                 </select>
               </div>
-              <div className="field">
-                <label>결과물 형식 (DELIVERABLE FORMAT)</label>
+              <div className="field"><label>결과물 형식</label>
                 <select>
                   <option>4K 영상 + 사진</option>
                   <option>정사영상 + 포인트클라우드</option>
                   <option>디지털 임무 완료 보고서</option>
-                  <option>실시간 스트리밍 + 녹화본</option>
                 </select>
               </div>
             </div>
             <div>
               <div style={{marginBottom:14}}>
-                <div style={{fontSize:9,color:"var(--text3)",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>장비 요구사항 (REQUIRED EQUIPMENT)</div>
-                {["DJI Mavic 3 이상급","측량용 RTK 드론","열화상 카메라 탑재","방수/방진 IP43+ 등급","페이로드 500g 이상"].map((eq,i) => (
-                  <label key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",cursor:"pointer"}}>
-                    <input type="checkbox" style={{accentColor:"var(--green)"}} />
-                    <span style={{fontSize:11,color:"var(--text2)"}}>{eq}</span>
+                <div style={{fontSize:11,fontWeight:500,color:"var(--text2)",marginBottom:8}}>장비 요구사항</div>
+                {["DJI Mavic 3 이상급","측량용 RTK 드론","열화상 카메라 탑재","방수/방진 IP43+ 등급"].map((eq,i) => (
+                  <label key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",cursor:"pointer",fontSize:12,color:"var(--text2)"}}>
+                    <input type="checkbox" style={{accentColor:"var(--blue-500)"}} />{eq}
                   </label>
                 ))}
               </div>
-              <div style={{padding:12,background:"var(--bg3)",border:"1px solid var(--border2)",fontSize:10,color:"var(--text2)",lineHeight:1.8}}>
-                <div style={{color:"var(--orange)",fontSize:9,letterSpacing:2,marginBottom:5}}>// 보안 이수자 전용 매칭</div>
-                <label style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer"}}>
-                  <input type="checkbox" style={{accentColor:"var(--green)",marginTop:2}} />
-                  <span>보안 교육 이수 파일럿만 매칭 (군 보안 서약서 제출자 우선 배정)</span>
+              <div style={{padding:12,background:"rgba(59,130,246,.06)",border:"1px solid rgba(59,130,246,.15)",borderRadius:8}}>
+                <div style={{fontSize:11,fontWeight:600,color:"var(--blue-300)",marginBottom:6}}>보안 이수자 전용 매칭</div>
+                <label style={{display:"flex",alignItems:"flex-start",gap:8,cursor:"pointer",fontSize:12,color:"var(--text2)"}}>
+                  <input type="checkbox" style={{accentColor:"var(--blue-500)",marginTop:2}} />
+                  군 보안 서약서 제출 파일럿만 매칭
                 </label>
               </div>
             </div>
           </div>
           <div className="sep" />
-          <div className="flex-b">
-            <button className="btn" onClick={() => setStep(2)}>◀ BACK</button>
-            <button className="btn primary" onClick={() => setStep(4)}>NEXT: CONFIRM ▶</button>
+          <div className="fb">
+            <button className="btn" onClick={() => setStep(2)}>← 이전</button>
+            <button className="btn primary" onClick={() => setStep(4)}>다음 단계 →</button>
           </div>
         </div>
       )}
 
       {/* STEP 4 */}
       {step===4 && (
-        <div>
-          <div className="st">임무 확인 및 제출</div>
-          <div style={{background:"var(--bg2)",border:"1px solid var(--border2)",padding:20,marginBottom:18,position:"relative"}}>
-            <div style={{position:"absolute",top:-1,left:-1,width:14,height:14,borderTop:"2px solid var(--green)",borderLeft:"2px solid var(--green)"}} />
-            <div style={{position:"absolute",bottom:-1,right:-1,width:14,height:14,borderBottom:"2px solid var(--green)",borderRight:"2px solid var(--green)"}} />
-            <div style={{fontSize:9,color:"var(--text3)",letterSpacing:3,marginBottom:14}}>MISSION BRIEFING SUMMARY</div>
-            {[
-              ["MISSION TYPE",     mType?.toUpperCase() || "-"],
-              ["SECURITY LEVEL",   sec?.toUpperCase() || "-"],
-              ["MATCHING MODE",    "공개 입찰"],
-              ["ESTIMATED BUDGET", "₩500,000"],
-              ["DELIVERABLE",      "디지털 임무 완료 보고서"],
-              ["STATUS",           "대기 중 → 제출 후 ACTIVE"],
-            ].map(([k,v]) => (
-              <div key={k} style={{display:"flex",padding:"7px 0",borderBottom:"1px solid var(--border)",fontSize:11}}>
-                <div style={{width:190,fontSize:9,color:"var(--text3)",letterSpacing:1,textTransform:"uppercase"}}>{k}</div>
-                <div className="tg">{v}</div>
+        <div className="card">
+          <div className="card-title mb14"><div className="ct-icon">✅</div>최종 확인</div>
+          <div style={{background:"var(--navy-900)",border:"1px solid var(--border)",borderRadius:10,padding:20,marginBottom:16}}>
+            {[["서비스 유형",mType?.toUpperCase()||"-"],["보안 등급",sec?.toUpperCase()||"-"],["매칭 방식","공개 입찰"],["예상 예산","₩500,000"],["결과물","디지털 임무 완료 보고서"],["상태","등록 후 → 진행중"]].map(([k,v]) => (
+              <div key={k} style={{display:"flex",padding:"8px 0",borderBottom:"1px solid rgba(21,38,69,.6)",fontSize:13}}>
+                <div style={{width:160,fontSize:11,color:"var(--text3)",fontWeight:500}}>{k}</div>
+                <div style={{color:"var(--blue-300)",fontWeight:500}}>{v}</div>
               </div>
             ))}
           </div>
-          <div style={{padding:12,background:"rgba(255,149,0,.05)",border:"1px solid rgba(255,149,0,.2)",fontSize:10,color:"var(--orange)",marginBottom:18,lineHeight:1.7}}>
-            ⚠ 제출 후 인증된 파일럿들에게 즉시 알림이 발송됩니다. 견적 수령까지 평균 2시간 소요.
+          <div style={{padding:12,background:"rgba(249,115,22,.06)",border:"1px solid rgba(249,115,22,.2)",borderRadius:8,fontSize:12,color:"#FB923C",marginBottom:16,lineHeight:1.7}}>
+            ⚠ 제출 후 인증된 파일럿들에게 즉시 알림이 발송됩니다. 평균 견적 수령 2시간 소요.
           </div>
-          <div className="flex-b">
-            <button className="btn" onClick={() => setStep(3)}>◀ BACK</button>
-            <button className="btn primary" style={{padding:"12px 32px"}} onClick={() => setSubmit(true)}>▶ MISSION SUBMIT</button>
+          <div className="fb">
+            <button className="btn" onClick={() => setStep(3)}>← 이전</button>
+            <button className="btn primary" style={{padding:"10px 28px"}} onClick={() => setSubmit(true)}>의뢰 등록 완료</button>
           </div>
         </div>
       )}
@@ -533,61 +500,69 @@ function MissionBriefing() {
   );
 }
 
-// ─────────────────────────────────────────────
-// FORCE LIST
-// ─────────────────────────────────────────────
+// ─── FORCE LIST ───
 function ForceList() {
   const [filter, setFilter] = useState("ALL");
   const FILTERS = ["ALL","정찰","측량","촬영","점검","보안"];
-
   const filtered = filter==="ALL" ? OPERATORS : OPERATORS.filter(o => o.specs.some(s => s.includes(filter)));
 
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEFORCE // OPERATORS</div>
-        <div className="ph-title">◆ FORCE LIST</div>
-        <div className="ph-sub">인증된 군 출신 드론 오퍼레이터 — {OPERATORS.length}명 등록</div>
+        <div className="ph-eyebrow">Operators</div>
+        <div className="ph-title sg">파일럿 목록</div>
+        <div className="ph-sub">인증된 군 출신 드론 전문가 {OPERATORS.length}명</div>
       </div>
 
-      <div style={{display:"flex",gap:7,marginBottom:18,flexWrap:"wrap"}}>
-        {FILTERS.map(f => (
-          <button key={f} className="btn" style={{fontSize:9,padding:"5px 12px",...(filter===f?{background:"var(--green4)",color:"var(--green)",borderColor:"var(--green)"}:{})}} onClick={() => setFilter(f)}>{f}</button>
-        ))}
-        <input type="text" placeholder="콜사인 또는 전문 분야 검색..." style={{marginLeft:"auto",background:"var(--bg2)",border:"1px solid var(--border2)",color:"var(--text)",padding:"5px 13px",fontFamily:"Share Tech Mono",fontSize:10,outline:"none",width:220}} />
+      <div className="fb mb20">
+        <div className="fc gap6" style={{flexWrap:"wrap"}}>
+          {FILTERS.map(f => (
+            <button key={f} className="btn sm" style={filter===f?{background:"rgba(59,130,246,.1)",color:"var(--blue-400)",borderColor:"rgba(59,130,246,.3)"}:{}} onClick={() => setFilter(f)}>{f}</button>
+          ))}
+        </div>
+        <input type="text" placeholder="이름 또는 콜사인 검색" style={{background:"var(--navy-800)",border:"1px solid var(--border)",color:"var(--text)",padding:"7px 14px",fontFamily:"Inter",fontSize:12,outline:"none",borderRadius:8,width:220}} />
       </div>
 
       <div className="g3">
         {filtered.map(op => {
-          const col = op.status==="available"?"var(--green)":op.status==="mission"?"var(--orange)":"#666";
-          const stlbl = op.status==="available"?"● READY":op.status==="mission"?"● ON MISSION":"○ STANDBY";
+          const col = op.status==="available" ? "var(--green)" : op.status==="mission" ? "var(--orange)" : "var(--text3)";
+          const stlbl = op.status==="available" ? "대기중" : op.status==="mission" ? "미션중" : "준비중";
           return (
             <div key={op.id} className="op-card">
-              <div className="flex-b mb8">
-                <div>
-                  <div className="callsign">{op.callsign}</div>
-                  <div style={{fontSize:10,color:"var(--text2)",marginTop:2}}>{op.name}</div>
+              <div className="fb mb14">
+                <div className="fc gap8">
+                  <div className="op-avatar">{op.initials}</div>
+                  <div>
+                    <div className="callsign">{op.callsign}</div>
+                    <div style={{fontSize:11,color:"var(--text2)",marginTop:1}}>{op.name}</div>
+                  </div>
                 </div>
-                <div style={{fontSize:8,color:col,border:`1px solid ${col === "var(--green)" ? "var(--green3)" : col==="var(--orange)"?"rgba(255,149,0,.3)":"#333"}`,padding:"2px 7px",letterSpacing:1,textTransform:"uppercase"}}>{stlbl}</div>
+                <div style={{fontSize:10,fontWeight:600,color:col,padding:"3px 8px",border:`1px solid ${col==="var(--green)"?"rgba(34,197,94,.3)":col==="var(--orange)"?"rgba(249,115,22,.3)":"rgba(148,163,184,.2)"}`,borderRadius:6}}>{stlbl}</div>
               </div>
 
               <div className="op-branch">{op.branch}</div>
-              <div style={{fontSize:9,color:"var(--text3)",marginTop:2}}>📍 {op.region}</div>
+              <div style={{fontSize:11,color:"var(--text3)",marginTop:2,marginBottom:10}}>📍 {op.region}</div>
 
-              <div className="spec-wrap">{op.specs.map(s => <span key={s} className="spec">{s}</span>)}</div>
-
-              <div className="op-stats">
-                <div><div className="osl">FLIGHT HRS</div><div className="osv">{op.hours}<span style={{fontSize:9,color:"var(--text3)"}}>H</span></div></div>
-                <div><div className="osl">MISSIONS</div><div className="osv">{op.missions}</div></div>
-                <div><div className="osl">RATING</div><div className="osv" style={{color:"var(--orange)"}}>{op.rating}<span style={{fontSize:9,color:"var(--text3)"}}>★</span></div></div>
-                <div><div className="osl">CERT</div><div className="orb" style={{fontSize:9,color:"var(--green2)",marginTop:3}}>✓ VERIFIED</div></div>
+              <div className="fc gap6" style={{flexWrap:"wrap",marginBottom:12}}>
+                {op.specs.map(s => <span key={s} className="spec">{s}</span>)}
               </div>
 
-              <div style={{marginTop:10}}><div className="pbar"><div className="pfill" style={{width:`${op.rating*20}%`}} /></div></div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,padding:"12px 0",borderTop:"1px solid var(--border)",marginBottom:12}}>
+                {[["비행시간",op.hours+"H"],["미션",op.missions+"건"],["평점",op.rating+"★"]].map(([l,v]) => (
+                  <div key={l}>
+                    <div className="op-stat-label">{l}</div>
+                    <div className="op-stat-val" style={{fontSize:13}}>{v}</div>
+                  </div>
+                ))}
+              </div>
 
-              <div style={{display:"flex",gap:7,marginTop:10}}>
-                <button className="btn" style={{flex:1,fontSize:9,padding:"6px"}}>프로필 보기</button>
-                {op.status==="available" && <button className="btn primary" style={{flex:1,fontSize:9,padding:"6px"}}>미션 제안</button>}
+              <div style={{height:3,background:"var(--navy-700)",borderRadius:2,marginBottom:12}}>
+                <div style={{height:"100%",width:`${op.rating*20}%`,background:"var(--blue-500)",borderRadius:2}} />
+              </div>
+
+              <div className="fc gap8">
+                <button className="btn sm" style={{flex:1}}>프로필</button>
+                {op.status==="available" && <button className="btn primary sm" style={{flex:1}}>미션 제안</button>}
               </div>
             </div>
           );
@@ -597,105 +572,76 @@ function ForceList() {
   );
 }
 
-// ─────────────────────────────────────────────
-// TACTICAL MAP
-// ─────────────────────────────────────────────
+// ─── TACTICAL MAP ───
 function TacticalMap() {
-  const [hovered, setHovered] = useState(null);
-
+  const [hov, setHov] = useState(null);
   const MARKERS = [
-    { x:"51%", y:"27%", id:"MSN-0047", label:"서울 강남",  color:"var(--orange)",  status:"active" },
-    { x:"46%", y:"30%", id:"MSN-0043", label:"경기 용인",  color:"var(--orange)",  status:"active" },
-    { x:"40%", y:"25%", id:"MSN-0046", label:"인천",       color:"var(--green2)",  status:"pending" },
-    { x:"72%", y:"72%", id:"MSN-0045", label:"부산",       color:"var(--blue)",    status:"complete" },
-    { x:"27%", y:"60%", id:"MSN-0044", label:"전북 김제",  color:"var(--blue)",    status:"complete" },
-    { x:"63%", y:"43%", id:"ZONE-A",   label:"대구",       color:"var(--text3)",   status:"standby" },
+    { x:"51%",y:"27%",id:"MSN-0047",label:"서울 강남",  col:"var(--orange)", status:"active" },
+    { x:"46%",y:"30%",id:"MSN-0043",label:"경기 용인",  col:"var(--orange)", status:"active" },
+    { x:"40%",y:"25%",id:"MSN-0046",label:"인천",       col:"var(--blue-400)",status:"pending" },
+    { x:"72%",y:"72%",id:"MSN-0045",label:"부산",       col:"var(--green)",  status:"complete" },
+    { x:"27%",y:"60%",id:"MSN-0044",label:"전북 김제",  col:"var(--green)",  status:"complete" },
   ];
 
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEFORCE // REAL-TIME</div>
-        <div className="ph-title">◉ TACTICAL MAP</div>
-        <div className="ph-sub">실시간 임무 현황 지도 (Supabase Realtime 연동 예정)</div>
+        <div className="ph-eyebrow">Tactical Map</div>
+        <div className="ph-title sg">실시간 미션 지도</div>
+        <div className="ph-sub">Supabase Realtime 연동 예정</div>
       </div>
 
-      <div style={{display:"flex",gap:16,alignItems:"center",marginBottom:10}}>
-        {[{col:"var(--orange)",lbl:"진행중 (2)"},{col:"var(--green2)",lbl:"견적대기 (1)"},{col:"var(--blue)",lbl:"완료 (2)"},{col:"var(--text3)",lbl:"대기 (1)"}].map(l => (
-          <div key={l.lbl} style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"var(--text2)"}}>
-            <div style={{width:8,height:8,background:l.col,transform:"rotate(45deg)"}} />{l.lbl}
+      <div className="fc gap12 mb14">
+        {[{col:"var(--orange)",l:"진행중 2건"},{col:"var(--blue-400)",l:"견적대기 1건"},{col:"var(--green)",l:"완료 2건"}].map(item => (
+          <div key={item.l} className="fc gap6">
+            <div style={{width:8,height:8,borderRadius:2,background:item.col,transform:"rotate(45deg)"}} />
+            <span style={{fontSize:12,color:"var(--text2)"}}>{item.l}</span>
           </div>
         ))}
-        <div style={{marginLeft:"auto",fontSize:9,color:"var(--text3)",letterSpacing:1}}>
-          LAST UPDATE: {new Date().toTimeString().slice(0,8)} KST
-        </div>
+        <div style={{marginLeft:"auto",fontSize:11,color:"var(--text3)"}}>마지막 업데이트: {new Date().toTimeString().slice(0,8)} KST</div>
       </div>
 
-      <div className="map-c">
-        <div className="map-grid" />
-        <div className="scan" />
+      <div className="map-wrap">
+        <div className="map-grid-bg" />
+        <div className="map-scan" />
 
-        {/* Korea SVG outline */}
-        <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",opacity:.12}} viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet">
-          <path d="M155,30 L168,22 L182,26 L198,22 L214,28 L228,38 L238,52 L244,68 L242,84 L252,100 L258,118 L262,138 L256,158 L266,174 L272,194 L268,214 L262,232 L256,248 L246,264 L240,280 L228,296 L216,308 L222,324 L226,340 L218,356 L206,370 L196,386 L192,402 L196,416 L186,424 L176,428 L168,418 L162,400 L152,384 L146,366 L150,350 L140,336 L136,320 L140,306 L134,292 L122,278 L112,264 L106,250 L100,236 L96,220 L100,204 L96,188 L92,172 L96,156 L100,140 L106,124 L112,110 L118,96 L124,82 L132,66 L142,48 Z" fill="none" stroke="var(--green)" strokeWidth="1.2" />
+        <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",opacity:.1}} viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet">
+          <path d="M155,30 L168,22 L182,26 L198,22 L214,28 L228,38 L238,52 L244,68 L242,84 L252,100 L258,118 L262,138 L256,158 L266,174 L272,194 L268,214 L262,232 L256,248 L246,264 L240,280 L228,296 L216,308 L222,324 L226,340 L218,356 L206,370 L196,386 L192,402 L196,416 L186,424 L176,428 L168,418 L162,400 L152,384 L146,366 L150,350 L140,336 L136,320 L140,306 L134,292 L122,278 L112,264 L106,250 L100,236 L96,220 L100,204 L96,188 L92,172 L96,156 L100,140 L106,124 L112,110 L118,96 L124,82 L132,66 L142,48 Z"
+            fill="none" stroke="var(--blue-500)" strokeWidth="1.5" />
         </svg>
 
-        {/* Coordinate labels */}
-        {["127°E","128°E","129°E"].map((c,i) => (
-          <div key={c} style={{position:"absolute",top:8,left:`${26+i*23}%`,fontSize:8,color:"var(--text3)",letterSpacing:1}}>{c}</div>
-        ))}
-        {["38°N","36°N","34°N"].map((c,i) => (
-          <div key={c} style={{position:"absolute",left:10,top:`${18+i*24}%`,fontSize:8,color:"var(--text3)",letterSpacing:1}}>{c}</div>
-        ))}
-
-        {/* Mission markers */}
         {MARKERS.map(m => (
           <div key={m.id} style={{position:"absolute",left:m.x,top:m.y,transform:"translate(-50%,-50%)"}}
-            onMouseEnter={() => setHovered(m.id)}
-            onMouseLeave={() => setHovered(null)}
-          >
-            <div style={{width:13,height:13,border:`2px solid ${m.color}`,transform:"rotate(45deg)",position:"relative",cursor:"pointer",transition:"transform .2s",...(hovered===m.id?{transform:"rotate(45deg) scale(1.4)"}:{})}}>
-              <div style={{position:"absolute",inset:2,background:m.color,opacity:.8,animation:m.status==="active"?"blink 1.5s infinite":"none"}} />
+            onMouseEnter={() => setHov(m.id)} onMouseLeave={() => setHov(null)}>
+            <div style={{width:14,height:14,border:`2px solid ${m.col}`,transform:"rotate(45deg)",cursor:"pointer",position:"relative",transition:"transform .2s",...(hov===m.id?{transform:"rotate(45deg) scale(1.5)"}:{})}}>
+              <div style={{position:"absolute",inset:2,background:m.col,opacity:.7}} />
             </div>
-            <div style={{position:"absolute",top:-18,left:14,fontSize:8,color:m.color,whiteSpace:"nowrap",letterSpacing:1,pointerEvents:"none"}}>
-              {m.label}
-            </div>
-            {hovered===m.id && (
-              <div style={{position:"absolute",top:-50,left:15,background:"var(--bg2)",border:`1px solid ${m.color}`,padding:"5px 10px",fontSize:9,color:m.color,whiteSpace:"nowrap",letterSpacing:1,zIndex:10}}>
-                {m.id}
-              </div>
+            <div style={{position:"absolute",top:-18,left:15,fontSize:10,color:m.col,whiteSpace:"nowrap",fontWeight:500,pointerEvents:"none"}}>{m.label}</div>
+            {hov===m.id && (
+              <div style={{position:"absolute",top:-44,left:16,background:"var(--navy-800)",border:`1px solid ${m.col}`,padding:"4px 10px",borderRadius:6,fontSize:11,color:m.col,whiteSpace:"nowrap",zIndex:10}}>{m.id}</div>
             )}
           </div>
         ))}
 
-        {/* Corner info */}
-        <div style={{position:"absolute",bottom:12,left:14,fontSize:8,color:"var(--text3)",letterSpacing:1,lineHeight:1.9}}>
-          <div>GRID REF: KR-TACTICAL-01</div>
-          <div>DATUM: WGS84</div>
-          <div style={{color:"var(--green)"}}>● LIVE FEED ACTIVE</div>
+        <div style={{position:"absolute",bottom:14,left:16,fontSize:10,color:"var(--text3)",lineHeight:1.9}}>
+          <div>WGS84 · KR</div>
+          <div style={{color:"var(--green)",fontWeight:500}}>● Live Feed Active</div>
         </div>
-        <div style={{position:"absolute",bottom:12,right:14,fontSize:8,color:"var(--text3)",letterSpacing:1,textAlign:"right",lineHeight:1.9}}>
-          <div>SCALE: 1:2,500,000</div>
-          <div>ZONES: 6</div>
-          <div style={{color:"var(--orange)"}}>⚠ 2 ACTIVE OPS</div>
-        </div>
-        <div style={{position:"absolute",top:12,right:14,fontSize:8,color:"var(--text3)",letterSpacing:1,textAlign:"right"}}>
-          [PROTOTYPE — Supabase Realtime 연동 예정]
-        </div>
+        <div style={{position:"absolute",top:14,right:16,fontSize:10,color:"var(--text3)"}}>Prototype — Supabase 연동 예정</div>
       </div>
 
       <div className="g3 mt16">
         {MISSIONS.slice(0,3).map(m => (
-          <div key={m.id} style={{background:"var(--bg2)",border:"1px solid var(--border2)",padding:13}}>
-            <div className="flex-b mb8">
-              <div className="orb" style={{fontSize:10,color:"var(--green)"}}>{m.id}</div>
-              <span className={`s ${m.status==="active"?"active":m.status==="pending"?"pending":"complete"}`} style={{fontSize:8}}>
+          <div key={m.id} className="card" style={{padding:14}}>
+            <div className="fb mb8">
+              <span className="sg" style={{fontSize:11,color:"var(--blue-300)",fontWeight:600}}>{m.id}</span>
+              <span className={`badge ${m.status==="active"?"active":m.status==="pending"?"pending":"complete"}`} style={{fontSize:10}}>
                 {m.status==="active"?"진행중":m.status==="pending"?"대기":"완료"}
               </span>
             </div>
-            <div style={{fontSize:11,color:"var(--text)",marginBottom:4}}>{m.title}</div>
-            <div style={{fontSize:9,color:"var(--text3)"}}>📍 {m.region}</div>
-            {m.op!=="-" && <div style={{marginTop:5,fontSize:9,color:"var(--green2)"}} className="orb">OPR: {m.op}</div>}
+            <div style={{fontSize:12,fontWeight:500,color:"var(--white)",marginBottom:4}}>{m.title}</div>
+            <div style={{fontSize:11,color:"var(--text3)"}}>📍 {m.region}</div>
+            {m.op!=="-" && <div style={{marginTop:6,fontSize:11,color:"var(--blue-300)",fontWeight:500}} className="sg">{m.op}</div>}
           </div>
         ))}
       </div>
@@ -703,78 +649,64 @@ function TacticalMap() {
   );
 }
 
-// ─────────────────────────────────────────────
-// INTEL CENTER
-// ─────────────────────────────────────────────
+// ─── INTEL CENTER ───
 function IntelCenter() {
   const INTELS = [
-    { icon:"⚖️", title:"항공안전법 드론 운용 규정",           desc:"초경량비행장치 신고 의무, 조종자 자격증 기준, 비행 승인 절차. 250g 이상 기체 신고 필수.",                            tag:"법규 · 필수",     tcol:"orange" },
-    { icon:"🚫", title:"비행금지구역 (NFZ) 데이터베이스",     desc:"전국 비행금지구역·제한구역 실시간 현황. 군사시설, 청와대, 원전 반경 내 비행 절대 금지.",                            tag:"규제 · 실시간",   tcol:"red" },
-    { icon:"🔒", title:"개인정보보호법 드론 촬영 가이드",     desc:"공공장소 드론 촬영 시 개인정보 처리 기준. 동의 획득 방법 및 영상 보관·파기 규정.",                                  tag:"법규 · 권고",     tcol:"green" },
-    { icon:"📋", title:"항공사업법 드론 사업자 등록",         desc:"드론 촬영·측량·배달 등 유상 비행 서비스 제공 시 필수 사업자 등록 절차 및 요건.",                                   tag:"사업 · 필수",     tcol:"orange" },
-    { icon:"🛡️", title:"드론 배상책임보험 가이드",           desc:"드론 사고 발생 시 손해배상 의무. 파일럿 개인 가입 의무 및 추천 보험사 목록 (메리츠, DB, 현대).",                    tag:"보험 · 권고",     tcol:"green" },
-    { icon:"📄", title:"디지털 임무 완료 보고서 템플릿",     desc:"DRONEFORCE 표준 보고서 양식. 비행 로그, 지형 분석, 결과물, 안전 체크리스트 포함. 지자체 납품 가능 포맷.",           tag:"문서 · 플랫폼",   tcol:"green" },
+    { icon:"⚖️", title:"항공안전법 드론 운용 규정",      desc:"250g 이상 기체 신고 의무, 조종자 자격 기준, 비행 승인 절차.",       tag:"법규 · 필수",   tcol:"blue" },
+    { icon:"🚫", title:"비행금지구역 (NFZ) 데이터베이스",desc:"전국 비행금지·제한구역 현황. 군사시설, 원전 반경 내 절대 금지.",      tag:"규제 · 실시간", tcol:"red" },
+    { icon:"🔒", title:"개인정보보호법 촬영 가이드",      desc:"공공장소 드론 촬영 시 개인정보 처리 기준 및 동의 획득 방법.",        tag:"법규 · 권고",   tcol:"blue" },
+    { icon:"📋", title:"항공사업법 사업자 등록",          desc:"유상 드론 서비스 제공 시 필수 사업자 등록 절차 및 요건.",            tag:"사업 · 필수",   tcol:"orange" },
+    { icon:"🛡️", title:"드론 배상책임보험 가이드",       desc:"파일럿 개인 가입 의무 및 추천 보험사 목록 (메리츠, DB, 현대).",       tag:"보험 · 권고",   tcol:"blue" },
+    { icon:"📄", title:"디지털 임무 완료 보고서 템플릿", desc:"비행 로그, 지형 분석, 결과물 포함. 지자체 납품 가능 표준 포맷.",      tag:"문서 · 플랫폼", tcol:"blue" },
   ];
 
-  const REPORTS = [
-    { id:"RPT-0045", mission:"인천항 시설 보안점검",     op:"GHOST-7", date:"2026.04.07", status:"완료" },
-    { id:"RPT-0044", mission:"김제 농지 방제작업",       op:"SCOUT-9", date:"2026.04.06", status:"완료" },
-    { id:"RPT-0042", mission:"수원 태양광 시설 점검",   op:"IRON-2",  date:"2026.04.03", status:"검토중" },
-  ];
-
-  const tagStyle = (tcol) => ({
-    background: tcol==="red"?"rgba(255,53,53,.08)":tcol==="green"?"rgba(0,255,65,.05)":"rgba(255,149,0,.08)",
-    color: tcol==="red"?"var(--red)":tcol==="green"?"var(--green2)":"var(--orange)",
-    border: `1px solid ${tcol==="red"?"rgba(255,53,53,.3)":tcol==="green"?"var(--green3)":"rgba(255,149,0,.3)"}`,
-  });
+  const tagColors = {blue:{bg:"rgba(59,130,246,.1)",color:"var(--blue-300)",border:"rgba(59,130,246,.2)"},red:{bg:"rgba(239,68,68,.08)",color:"#F87171",border:"rgba(239,68,68,.2)"},orange:{bg:"rgba(249,115,22,.08)",color:"#FB923C",border:"rgba(249,115,22,.2)"}};
 
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEFORCE // KNOWLEDGE BASE</div>
-        <div className="ph-title">▣ INTEL CENTER</div>
-        <div className="ph-sub">법규 정보 · 비행금지구역 · 임무 보고서 보관함</div>
+        <div className="ph-eyebrow">Intel Center</div>
+        <div className="ph-title sg">규정 · 법규 · 보고서</div>
+        <div className="ph-sub">드론 운용 관련 필수 정보 허브</div>
       </div>
 
-      {/* CRITICAL NOTICE */}
-      <div style={{background:"rgba(255,53,53,.04)",border:"1px solid rgba(255,53,53,.2)",padding:14,marginBottom:20,display:"flex",gap:12,alignItems:"flex-start"}}>
-        <div style={{color:"var(--red)",fontSize:17,flexShrink:0}}>⚠</div>
+      <div style={{background:"rgba(249,115,22,.05)",border:"1px solid rgba(249,115,22,.2)",borderRadius:10,padding:14,marginBottom:20,display:"flex",gap:12}}>
+        <span style={{fontSize:16}}>⚠️</span>
         <div>
-          <div style={{fontSize:10,color:"var(--red)",letterSpacing:1,marginBottom:4}}>CRITICAL NOTICE — 2026년 항공안전법 개정</div>
-          <div style={{fontSize:10,color:"var(--text2)",lineHeight:1.8}}>
-            25kg 이상 기체 사용 시 별도 운용자 격증 필요. 비행 계획 신고는 비행 24시간 전까지
-            드론원스톱 시스템(drone.onestop.go.kr) 제출 필수. 위반 시 200만원 이하 과태료.
-          </div>
+          <div style={{fontSize:12,fontWeight:600,color:"#FB923C",marginBottom:4}}>2026년 항공안전법 개정 안내</div>
+          <div style={{fontSize:12,color:"var(--text2)",lineHeight:1.7}}>25kg 이상 기체 별도 운용 자격 필요. 비행 24시간 전 드론원스톱 시스템 신고 필수. 위반 시 200만원 이하 과태료.</div>
         </div>
       </div>
 
       <div className="g2">
         {INTELS.map((item,i) => (
-          <div key={i} className="ic">
-            <div className="ii">{item.icon}</div>
+          <div key={i} className="intel-card">
+            <div className="intel-icon">{item.icon}</div>
             <div>
-              <div className="it">{item.title}</div>
-              <div className="id-">{item.desc}</div>
-              <div className="itag" style={tagStyle(item.tcol)}>{item.tag}</div>
+              <div className="intel-title">{item.title}</div>
+              <div className="intel-desc">{item.desc}</div>
+              <div className="intel-tag" style={{background:tagColors[item.tcol].bg,color:tagColors[item.tcol].color,border:`1px solid ${tagColors[item.tcol].border}`}}>{item.tag}</div>
             </div>
           </div>
         ))}
       </div>
 
       <div className="sep" />
-      <div className="st">최근 임무 완료 보고서</div>
-      <div style={{background:"var(--bg2)",border:"1px solid var(--border2)"}}>
-        <table className="tt">
-          <thead><tr><th>보고서 ID</th><th>임무명</th><th>오퍼레이터</th><th>완료일</th><th>상태</th><th>액션</th></tr></thead>
+      <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:12}}>최근 임무 완료 보고서</div>
+      <div className="card" style={{padding:0,overflow:"hidden"}}>
+        <table className="tbl">
+          <thead><tr><th>보고서 ID</th><th>임무명</th><th>파일럿</th><th>완료일</th><th>상태</th><th></th></tr></thead>
           <tbody>
-            {REPORTS.map(r => (
+            {[{id:"RPT-0045",mission:"인천항 시설 보안점검",op:"GHOST-7",date:"2026.04.07",status:"complete"},
+              {id:"RPT-0044",mission:"김제 농지 방제작업",op:"SCOUT-9",date:"2026.04.06",status:"complete"},
+              {id:"RPT-0042",mission:"수원 태양광 시설 점검",op:"IRON-2",date:"2026.04.03",status:"pending"}].map(r => (
               <tr key={r.id}>
-                <td className="orb" style={{fontSize:10,color:"var(--green)"}}>{r.id}</td>
-                <td>{r.mission}</td>
-                <td className="orb" style={{fontSize:10}}>{r.op}</td>
-                <td className="ts td">{r.date}</td>
-                <td><span className={`s ${r.status==="완료"?"complete":"pending"}`}>{r.status}</span></td>
-                <td><button className="btn" style={{fontSize:9,padding:"4px 10px"}}>다운로드</button></td>
+                <td className="sg" style={{fontSize:12,color:"var(--blue-300)",fontWeight:600}}>{r.id}</td>
+                <td style={{fontWeight:500}}>{r.mission}</td>
+                <td className="sg" style={{fontSize:12,fontWeight:600}}>{r.op}</td>
+                <td style={{color:"var(--text2)",fontSize:12}}>{r.date}</td>
+                <td><span className={`badge ${r.status==="complete"?"complete":"pending"}`}>{r.status==="complete"?"완료":"검토중"}</span></td>
+                <td><button className="btn sm">다운로드</button></td>
               </tr>
             ))}
           </tbody>
@@ -784,81 +716,72 @@ function IntelCenter() {
   );
 }
 
-// ─────────────────────────────────────────────
-// OPERATOR DASHBOARD  (파일럿 전용)
-// ─────────────────────────────────────────────
-function OperatorDash() {
-  const me = OPERATORS[0]; // GHOST-7 as logged-in operator
-
+// ─── OPERATOR HQ ───
+function OperatorHQ() {
+  const me = OPERATORS[0];
   return (
     <div>
       <div className="ph">
-        <div className="ph-pre">DRONEFORCE // OPERATOR HQ</div>
-        <div className="ph-title orb">⬢ {me.callsign} — OPERATOR HQ</div>
+        <div className="ph-eyebrow">Operator HQ</div>
+        <div className="ph-title sg">{me.callsign} 대시보드</div>
         <div className="ph-sub">{me.branch} · {me.region}</div>
       </div>
 
-      {/* PILOT STATS */}
-      <div className="g4 mb22">
-        {[
-          {l:"TOTAL FLIGHT HRS", v:me.hours+"H", col:""},
-          {l:"MISSIONS COMPLETED", v:me.missions, col:""},
-          {l:"RATING", v:me.rating+"★", col:"o"},
-          {l:"TRUST LEVEL", v:"78%", col:""},
-        ].map((s,i) => (
-          <div key={i} className="card">
-            <div className="cl">{s.l}</div>
-            <div className={`cv ${s.col}`}>{s.v}</div>
+      <div className="g4 mb20">
+        {[["비행 시간",me.hours+"H",""],["완료 미션",me.missions+"건",""],["평점",me.rating+"★","orange"],["신뢰도","78%","blue"]].map(([l,v,c]) => (
+          <div key={l} className="stat-card">
+            <div className="stat-label">{l}</div>
+            <div className={`stat-val ${c}`}>{v}</div>
           </div>
         ))}
       </div>
 
-      <div className="g2 mb22">
-        {/* 추천 일감 */}
+      <div className="g2">
         <div>
-          <div className="st">추천 일감 (RECOMMENDED MISSIONS)</div>
-          {MISSIONS.filter(m => m.status==="pending" || m.status==="active").map(m => (
-            <div key={m.id} style={{background:"var(--bg2)",border:"1px solid var(--border2)",padding:14,marginBottom:8,transition:"all .15s",cursor:"pointer"}}>
-              <div className="flex-b mb8">
-                <div className="orb" style={{fontSize:10,color:"var(--green)"}}>{m.id}</div>
-                <div style={{fontSize:10,color:"var(--orange)"}}>₩{m.budget.toLocaleString()}</div>
+          <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:12}}>추천 의뢰</div>
+          {MISSIONS.filter(m => m.status==="pending").map(m => (
+            <div key={m.id} className="card" style={{padding:14,marginBottom:8}}>
+              <div className="fb mb8">
+                <span className="sg" style={{fontSize:11,color:"var(--blue-300)",fontWeight:600}}>{m.id}</span>
+                <span style={{color:"var(--orange)",fontWeight:600,fontSize:13}}>₩{m.budget.toLocaleString()}</span>
               </div>
-              <div style={{fontSize:12,color:"var(--text)",marginBottom:4}}>{m.title}</div>
-              <div style={{fontSize:9,color:"var(--text3)"}}>📍 {m.region} · {m.date}</div>
-              <div style={{display:"flex",gap:7,marginTop:10}}>
-                <button className="btn" style={{fontSize:9,padding:"5px 10px"}}>상세 보기</button>
-                <button className="btn primary" style={{fontSize:9,padding:"5px 14px"}}>견적 제안</button>
+              <div style={{fontSize:13,fontWeight:500,color:"var(--white)",marginBottom:4}}>{m.title}</div>
+              <div style={{fontSize:11,color:"var(--text3)",marginBottom:10}}>📍 {m.region} · {m.date}</div>
+              <div className="fc gap8">
+                <button className="btn sm" style={{flex:1}}>상세 보기</button>
+                <button className="btn primary sm" style={{flex:1}}>견적 제안</button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* 내 프로필 / 장비 */}
         <div>
-          <div className="st">OPERATOR PROFILE</div>
-          <div style={{background:"var(--bg2)",border:"1px solid var(--border2)",padding:16}}>
-            <div className="callsign mb8">{me.callsign}</div>
-            <div className="op-branch mb8">{me.branch}</div>
-            <div style={{fontSize:9,color:"var(--text3)",letterSpacing:2,marginBottom:8}}>// 전문 분야</div>
-            <div className="spec-wrap mb16">{me.specs.map(s => <span key={s} className="spec">{s}</span>)}</div>
-
-            <div style={{fontSize:9,color:"var(--text3)",letterSpacing:2,marginBottom:8}}>// 인증 현황</div>
+          <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:12}}>인증 현황</div>
+          <div className="card">
+            <div className="fc gap8 mb14">
+              <div className="op-avatar">{me.initials}</div>
+              <div>
+                <div className="callsign">{me.callsign}</div>
+                <div style={{fontSize:11,color:"var(--text2)"}}>{me.name} · {me.branch}</div>
+              </div>
+            </div>
             {[
-              {lbl:"초경량비행장치 조종자 (1종)",  ok:true},
-              {lbl:"군 경력 증명서",                ok:true},
-              {lbl:"드론 배상책임보험",              ok:true},
-              {lbl:"보안 교육 이수",                 ok:false},
+              {l:"초경량비행장치 조종자 (1종)", ok:true},
+              {l:"군 경력 증명서", ok:true},
+              {l:"드론 배상책임보험", ok:true},
+              {l:"보안 교육 이수", ok:false},
             ].map(c => (
-              <div key={c.lbl} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:"1px solid var(--border)",fontSize:10}}>
-                <div style={{color:c.ok?"var(--green)":"var(--orange)",fontFamily:"Orbitron",fontSize:10}}>{c.ok?"✓":"○"}</div>
-                <div style={{color:c.ok?"var(--text)":"var(--text3)"}}>{c.lbl}</div>
-                {!c.ok && <div style={{marginLeft:"auto",fontSize:8,color:"var(--orange)"}}>미완료</div>}
+              <div key={c.l} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid var(--border)",fontSize:12}}>
+                <div style={{color:c.ok?"var(--green)":"var(--orange)",fontWeight:600}}>{c.ok?"✓":"○"}</div>
+                <div style={{color:c.ok?"var(--text)":"var(--text3)",flex:1}}>{c.l}</div>
+                {!c.ok && <span className="badge pending" style={{fontSize:10}}>미완료</span>}
               </div>
             ))}
-
             <div style={{marginTop:14}}>
-              <div className="pbar"><div className="pfill" style={{width:"78%"}} /></div>
-              <div style={{fontSize:8,color:"var(--text3)",marginTop:4}}>프로필 완성도 78%</div>
+              <div style={{height:4,background:"var(--navy-700)",borderRadius:2}}>
+                <div style={{height:"100%",width:"78%",background:"var(--blue-500)",borderRadius:2}} />
+              </div>
+              <div style={{fontSize:11,color:"var(--text3)",marginTop:5}}>프로필 완성도 78%</div>
             </div>
           </div>
         </div>
@@ -867,10 +790,8 @@ function OperatorDash() {
   );
 }
 
-// ─────────────────────────────────────────────
-// MAIN APP
-// ─────────────────────────────────────────────
-export default function DRONEFORCE() {
+// ─── MAIN APP ───
+export default function DroneForce() {
   const [screen,  setScreen]  = useState("login");
   const [nav,     setNav]     = useState("command");
   const [role,    setRole]    = useState(null);
@@ -885,132 +806,116 @@ export default function DRONEFORCE() {
     return () => clearInterval(timer);
   }, []);
 
-  const fmt = (d) => d.toTimeString().slice(0,8);
-  const fmtD = (d) => d.toISOString().slice(0,10);
-
-  // ── LOGIN ──
+  // LOGIN
   if (screen==="login") return (
-    <div className="db-app">
-      <div className="grid-bg" />
-      <div className="login-wrap">
-        <div className="login-box">
-          <div style={{textAlign:"center",marginBottom:28}}>
-            <div style={{fontSize:9,color:"var(--text3)",letterSpacing:4,marginBottom:10}}>▶ SYSTEM INITIALIZE ◀</div>
-            <div className="logo" style={{fontSize:26,letterSpacing:6,display:"block"}}>DRONE<span>FORCE</span></div>
-            <div style={{fontSize:10,color:"var(--text2)",letterSpacing:2,marginTop:8}}>TACTICAL OPERATIONS PLATFORM v2.6.0</div>
-          </div>
+    <div className="app login-wrap">
+      <div className="login-glow" />
+      <div className="login-box">
+        <div style={{textAlign:"center",marginBottom:28}}>
+          <div className="login-logo">Drone<em>Force</em></div>
+          <div style={{fontSize:12,color:"var(--text2)",marginTop:6}}>군 출신 드론 전문가 매칭 플랫폼</div>
+        </div>
 
-          <div style={{fontSize:9,color:"var(--text3)",letterSpacing:3,marginBottom:10}}>▸ SELECT CLEARANCE LEVEL</div>
-          <div className="role-grid">
-            <div className={`rc ${selRole==="command"?"sel":""}`} onClick={() => setSelRole("command")}>
-              <div className="ri">🎯</div>
-              <div className="rt">COMMAND</div>
-              <div className="rd">의뢰인 / 클라이언트</div>
-            </div>
-            <div className={`rc ${selRole==="operator"?"sel":""}`} onClick={() => setSelRole("operator")}>
-              <div className="ri">🚁</div>
-              <div className="rt">OPERATOR</div>
-              <div className="rd">드론 파일럿 / 전역 군인</div>
-            </div>
+        <div style={{fontSize:11,fontWeight:500,color:"var(--text2)",marginBottom:10}}>역할 선택</div>
+        <div className="role-grid">
+          <div className={`role-card ${selRole==="command"?"sel":""}`} onClick={() => setSelRole("command")}>
+            <div className="role-icon">🎯</div>
+            <div className="role-title">클라이언트</div>
+            <div className="role-desc">드론 서비스 의뢰</div>
           </div>
-
-          <div className="field" style={{marginBottom:10}}>
-            <label>IDENTIFICATION CODE</label>
-            <input type="text" placeholder="아이디 또는 이메일" />
+          <div className={`role-card ${selRole==="operator"?"sel":""}`} onClick={() => setSelRole("operator")}>
+            <div className="role-icon">🚁</div>
+            <div className="role-title">파일럿</div>
+            <div className="role-desc">전역 군인 / 전문가</div>
           </div>
-          <div className="field" style={{marginBottom:18}}>
-            <label>AUTHENTICATION KEY</label>
-            <input type="password" placeholder="비밀번호" />
-          </div>
+        </div>
 
-          <button className="btn primary" style={{width:"100%",padding:13}} onClick={() => { if(selRole){ setRole(selRole); setScreen("app"); }}}>
-            ▶ SYSTEM ACCESS
-          </button>
+        <div className="field" style={{marginBottom:10}}>
+          <label>이메일</label>
+          <input type="email" placeholder="name@email.com" />
+        </div>
+        <div className="field" style={{marginBottom:20}}>
+          <label>비밀번호</label>
+          <input type="password" placeholder="••••••••" />
+        </div>
 
-          <div style={{textAlign:"center",marginTop:14,fontSize:10,color:"var(--text3)"}}>
-            신규 등록 → <span style={{color:"var(--green2)",cursor:"pointer"}}>PRE-REGISTRATION</span>
-          </div>
+        <button className="btn primary" style={{width:"100%",padding:11,fontSize:14}} onClick={() => { if(selRole){ setRole(selRole); setScreen("app"); }}}>
+          로그인
+        </button>
+        <div style={{textAlign:"center",marginTop:14,fontSize:12,color:"var(--text3)"}}>
+          계정이 없으신가요? <span style={{color:"var(--blue-400)",cursor:"pointer",fontWeight:500}}>사전 등록하기</span>
+        </div>
 
-          <div style={{marginTop:22,padding:12,background:"var(--bg3)",border:"1px solid var(--border2)",fontSize:9,color:"var(--text3)",letterSpacing:1,lineHeight:2}}>
-            <div style={{color:"var(--green3)",marginBottom:4}}>// LIVE SYSTEM STATUS</div>
-            <div>ACTIVE OPERATORS ................. 24</div>
-            <div>ONGOING MISSIONS ................. 07</div>
-            <div>PLATFORM UPTIME ........... 99.7%</div>
-            <div style={{color:"var(--green)",marginTop:4}}>● ALL SYSTEMS NOMINAL</div>
+        <div style={{marginTop:24,padding:14,background:"var(--navy-800)",border:"1px solid var(--border)",borderRadius:10}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,textAlign:"center"}}>
+            {[["24명","대기 파일럿"],["7건","진행 미션"],["99.7%","업타임"]].map(([v,l]) => (
+              <div key={l}>
+                <div className="sg" style={{fontSize:16,fontWeight:700,color:"var(--white)"}}>{v}</div>
+                <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{l}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
 
-  // ── NAV ITEMS ──
-  const NAV = [
-    { id:"command",  icon:"◈", label:"COMMAND CTR",  badge:null },
-    { id:"mission",  icon:"✦", label:"MISSION BRIEF", badge:"3" },
-    { id:"force",    icon:"◆", label:"FORCE LIST",    badge:null },
-    { id:"map",      icon:"◉", label:"TACTICAL MAP",  badge:null },
-    { id:"intel",    icon:"▣", label:"INTEL CENTER",  badge:null },
-    ...(role==="operator" ? [{ id:"opdash", icon:"⬢", label:"OPERATOR HQ", badge:"!" }] : []),
+  const NAV_ITEMS = [
+    {id:"command", icon:"◈", label:"대시보드"},
+    {id:"mission", icon:"✦", label:"의뢰 등록", badge:"3"},
+    {id:"force",   icon:"◆", label:"파일럿 목록"},
+    {id:"map",     icon:"◉", label:"실시간 지도"},
+    {id:"intel",   icon:"▣", label:"정보 센터"},
+    ...(role==="operator"?[{id:"ophq",icon:"⬢",label:"내 대시보드",badge:"!",badgeOrange:true}]:[]),
   ];
 
-  const PAGE = {
-    command:  <CommandCenter />,
-    mission:  <MissionBriefing />,
-    force:    <ForceList />,
-    map:      <TacticalMap />,
-    intel:    <IntelCenter />,
-    opdash:   <OperatorDash />,
-  };
+  const PAGE = {command:<CommandCenter/>,mission:<MissionBriefing/>,force:<ForceList/>,map:<TacticalMap/>,intel:<IntelCenter/>,ophq:<OperatorHQ/>};
 
   return (
-    <div className="db-app">
-      <div className="grid-bg" />
-
-      {/* TOP BAR */}
+    <div className="app">
       <div className="topbar">
-        <div className="logo">DRONE<span>FORCE</span></div>
-        <div className="vbar" />
-        <div className="sys"><div className="dot" /> SYS ONLINE</div>
-        <div className="sys"><div className="dot" /> DB CONNECTED</div>
-        <div className="sys"><div className="dot o" /> 7 ACTIVE MISSIONS</div>
-        <div className="ml-auto flex gap12" style={{alignItems:"center"}}>
-          <div className="clock">{fmt(time)}</div>
-          <div className="sys">{fmtD(time)}</div>
-          <div className="badge-user" onClick={() => setScreen("login")}>
-            [{role==="command"?"CMD":"OPR"}] ▸ LOGOUT
+        <div className="logo">Drone<em>Force</em><span className="logo-badge">BETA</span></div>
+        <div className="divider" />
+        <div className="fc gap6">
+          <div className="status-dot" />
+          <div className="status-text">시스템 정상</div>
+        </div>
+        <div className="fc gap6">
+          <div style={{width:6,height:6,borderRadius:"50%",background:"var(--orange)"}} />
+          <div className="status-text">미션 7건 진행중</div>
+        </div>
+        <div className="topbar-right">
+          <div className="clock-badge">{time.toTimeString().slice(0,8)}</div>
+          <div className="user-btn" onClick={() => setScreen("login")}>
+            <div className="avatar">{role==="command"?"C":"O"}</div>
+            <span>{role==="command"?"클라이언트":"파일럿"}</span>
+            <span style={{color:"var(--text3)"}}>↗</span>
           </div>
         </div>
       </div>
 
       <div className="layout">
-        {/* SIDEBAR */}
         <div className="sidebar">
-          <div className="ns" style={{marginBottom:6}}>NAVIGATION</div>
-          {NAV.map(item => (
+          <div style={{padding:"0 16px 14px"}}>
+            <div className="nav-section" style={{marginBottom:8}}>메뉴</div>
+          </div>
+          {NAV_ITEMS.map(item => (
             <div key={item.id} className={`nav-item ${nav===item.id?"active":""}`} onClick={() => setNav(item.id)}>
-              <span className="ni">{item.icon}</span>
-              <span style={{fontSize:10,letterSpacing:1,textTransform:"uppercase"}}>{item.label}</span>
-              {item.badge && <span className="nb">{item.badge}</span>}
+              <span className="nav-icon">{item.icon}</span>
+              <span>{item.label}</span>
+              {item.badge && <span className={`nav-badge ${item.badgeOrange?"orange":""}`}>{item.badge}</span>}
             </div>
           ))}
 
-          <div style={{marginTop:"auto",padding:"14px 14px"}}>
-            <div className="ns" style={{marginBottom:7}}>CLEARANCE</div>
-            <div style={{fontSize:11,color:"var(--green2)",letterSpacing:1,padding:"0 2px"}}>
-              {role==="command"?"🎯 COMMAND":"🚁 OPERATOR"}
-            </div>
-            <div style={{marginTop:8}}>
+          <div className="sidebar-footer">
+            <div className="plan-card">
+              <div className="plan-label">TRUST LEVEL</div>
+              <div className="plan-val">Level 3 · Verified</div>
               <div className="pbar"><div className="pfill" style={{width:"78%"}} /></div>
-              <div style={{fontSize:8,color:"var(--text3)",marginTop:4}}>TRUST LVL: 78%</div>
-            </div>
-            <div style={{marginTop:12,fontSize:8,color:"var(--text3)",letterSpacing:1,lineHeight:1.9}}>
-              <div>VER: v2.6.0-PROTO</div>
-              <div style={{color:"var(--green3)"}}>● VERCEL DEPLOYED</div>
             </div>
           </div>
         </div>
 
-        {/* MAIN CONTENT */}
         <div className="main">
           {PAGE[nav] || PAGE.command}
         </div>
