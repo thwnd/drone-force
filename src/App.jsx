@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import LandingPage from './LandingPage'
-import DroneForce from './dronebridge-tactical'
+import DroneForce from './droneforce-navy'
 
 export default function App() {
   const [page, setPage] = useState('landing')
@@ -9,5 +9,5 @@ export default function App() {
     return <LandingPage onEnter={() => setPage('app')} />
   }
 
-  return <DroneForce />
+  return <DroneForce onHome={() => setPage('landing')} />
 }
