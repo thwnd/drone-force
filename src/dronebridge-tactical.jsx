@@ -791,7 +791,7 @@ function OperatorHQ() {
 }
 
 // ─── MAIN APP ───
-export default function DroneForce({ onHome }) {
+export default function DroneForce({ onHome = () => {} }) {
   const [screen,  setScreen]  = useState("login");
   const [nav,     setNav]     = useState("command");
   const [role,    setRole]    = useState(null);
@@ -874,9 +874,7 @@ export default function DroneForce({ onHome }) {
   return (
     <div className="app">
       <div className="topbar">
-        <div className="logo" onClick={onHome}style={{cursor:"pointer"}}> Drone<em>Force</em>
-          <span className="logo-badge">BETA</span>
-        </div>
+        <div className="logo" onClick={onHome} style={{cursor:"pointer"}}>Drone<em>Force</em><span className="logo-badge">BETA</span></div>
         <div className="divider" />
         <div className="fc gap6">
           <div className="status-dot" />
